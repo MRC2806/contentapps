@@ -1,0 +1,1981 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react'; // Added useCallback, useRef
+
+// Import lucide-react icons
+import { Copy, Sparkles, XCircle, Film, Zap, TrendingUp, ShoppingBag, HelpCircle, Rocket, ChevronDown, ChevronUp, Eye, Clapperboard, Edit3, Library, Users, MapPin, Package, Gem, Link2, Settings, Palette, Brain, PlusCircle, Trash2 } from 'lucide-react';
+
+// Options for dropdowns (Manual Mode)
+const timeOptions = [
+  { value: '', label: 'Select Time (Pilih Waktu)' },
+  { value: 'Day', label: 'Day (Siang Hari)' },
+  { value: 'Night', label: 'Night (Malam Hari)' },
+  { value: 'Dawn', label: 'Dawn (Fajar)' },
+  { value: 'Dusk', label: 'Dusk (Senja)' },
+  { value: 'Morning', label: 'Morning (Pagi Hari)' },
+  { value: 'Afternoon', label: 'Afternoon (Siang Menjelang Sore)' },
+  { value: 'Evening', label: 'Evening (Sore Hari)' },
+  { value: 'Midnight', label: 'Midnight (Tengah Malam)' },
+  { value: 'Golden Hour', label: 'Golden Hour (Jam Emas)' },
+  { value: 'Blue Hour', label: 'Blue Hour (Jam Biru)' },
+];
+
+const cameraMovementOptions = [
+  { value: '', label: 'Select Camera Movement (Pilih Gerakan Kamera)' },
+  { value: 'Static Shot', label: 'Static Shot (Bidikan Statis)' },
+  { value: 'Pan', label: 'Pan (Geser Horizontal)' },
+  { value: 'Tilt', label: 'Tilt (Geser Vertikal)' },
+  { value: 'Zoom In', label: 'Zoom In (Perbesar)' },
+  { value: 'Zoom Out', label: 'Zoom Out (Perkecil)' },
+  { value: 'Dolly In', label: 'Dolly In (Maju Mendekat)' },
+  { value: 'Dolly Out', label: 'Dolly Out (Mundur Menjauh)' },
+  { value: 'Trucking Shot', label: 'Trucking Shot (Bergerak Lateral)' },
+  { value: 'Pedestal Up', label: 'Pedestal Up (Naik Vertikal)' },
+  { value: 'Pedestal Down', label: 'Pedestal Down (Turun Vertikal)' },
+  { value: 'Crane Shot', label: 'Crane Shot (Bidikan Derek)' },
+  { value: 'Handheld', label: 'Handheld (Genggam)' },
+  { value: 'Steadicam', label: 'Steadicam (Stabil)' },
+  { value: 'Whip Pan', label: 'Whip Pan (Geser Cepat)' },
+  { value: 'Crash Zoom', label: 'Crash Zoom (Zoom Mendadak)' },
+  { value: 'Bullet-time Effect', label: 'Bullet-time Effect (Efek Bullet-time)' },
+  { value: 'FPV Drone Movement', label: 'FPV Drone Movement (Gerakan Drone FPV)' },
+  { value: 'Dolly Zoom-in (Vertigo)', label: 'Dolly Zoom-in (Efek Vertigo)' },
+  { value: 'Robo Arm', label: 'Robo Arm (Lengan Robot)' },
+  { value: 'Super Dolly-in', label: 'Super Dolly-in (Dolly Super Dekat)' },
+  { value: 'Focus Change', label: 'Focus Change (Perubahan Fokus)' },
+  { value: '360 Orbit', label: '360 Orbit (Orbit 360 Derajat)' },
+  { value: 'Through Object-in', label: 'Through Object-in (Melalui Objek)' },
+  { value: 'Lazy Susan', label: 'Lazy Susan (Putaran Lambat)' },
+  { value: 'Action Run', label: 'Action Run (Lari Aksi)' },
+  { value: 'Dutch Angle', label: 'Dutch Angle (Sudut Belanda)' },
+  { value: 'Car Grip', label: 'Car Grip (Genggam Mobil)' },
+  { value: 'Overhead', label: 'Overhead (Dari Atas)' },
+  { value: 'Snorri Cam', label: 'Snorri Cam (Kamera Snorri)' },
+  { value: 'Arc', label: 'Arc (Busur)' },
+  { value: 'Eyes In', label: 'Eyes In (Mata Masuk)' },
+  { value: 'Face Punch', label: 'Face Punch (Pukulan Wajah)' },
+  { value: 'Angel Wings', label: 'Angel Wings (Sayap Malaikat)' },
+  { value: 'Garden Bloom', label: 'Garden Bloom (Mekar Taman)' },
+  { value: 'Turning Metal', label: 'Turning Metal (Logam Berputar)' },
+  { value: 'Set on Fire', label: 'Set on Fire (Terbakar)' },
+  { value: 'Head Explosion', label: 'Head Explosion (Ledakan Kepala)' },
+  { value: 'Thunder God', label: 'Thunder God (Dewa Petir)' },
+  { value: 'Morphskin', label: 'Morphskin (Kulit Morf)' },
+  { value: 'Kiss POV', label: 'Kiss POV (Sudut Pandang Ciuman)' },
+  { value: 'Disintegration', label: 'Disintegration (Disintegrasi)' },
+  { value: 'Glass Shatter', label: 'Glass Shatter (Pecah Kaca)' },
+  { value: 'Melting Building Explosion', label: 'Melting Building Explosion (Ledakan Gedung Meleleh)' },
+  { value: 'Mouth Datamosh', label: 'Mouth Datamosh (Datamosh Mulut)' },
+  { value: 'Floating Fish', label: 'Floating Fish (Ikan Mengambang)' },
+  { value: 'Flood', label: 'Flood (Banjir)' },
+  { value: 'Floral Eyes', label: 'Floral Eyes (Mata Bunga)' },
+  { value: 'Glowshift', label: 'Glowshift (Pergeseran Cahaya)' },
+  { value: 'Invisible', label: 'Invisible (Tak Terlihat)' },
+  { value: 'Jelly Drift', label: 'Jelly Drift (Melayang Jeli)' },
+  { value: 'Lens Crack', label: 'Lens Crack (Retak Lensa)' },
+  { value: 'Levitation', label: 'Levitasi)' },
+  { value: 'Medusa Gorgona', label: 'Medusa Gorgona (Medusa Gorgona)' },
+  { value: 'Moonwalk Left', label: 'Moonwalk Left (Moonwalk Kiri)' },
+];
+
+// Genre Options for Creative Director
+const genreOptions = [
+  { value: '', label: 'Pilih Genre Video (Opsional)' },
+  { value: 'Action', label: 'Action (Aksi)' },
+  { value: 'Comedy', label: 'Comedy (Komedi)' },
+  { value: 'Horror', label: 'Horor (Horor)' },
+  { value: 'Drama', label: 'Drama' },
+  { value: 'Sci-Fi', label: 'Sci-Fi (Fiksi Ilmiah)' },
+  { value: 'Fantasy', label: 'Fantasy (Fantasi)' },
+  { value: 'Romance', label: 'Romance (Romantis)' },
+  { value: 'Thriller', label: 'Thriller (Mencekam)' },
+  { value: 'Mystery', label: 'Mystery (Misteri)' },
+  { value: 'Documentary', label: 'Documentary (Dokumenter)' },
+  { value: 'Animation', label: 'Animation (Animasi)' },
+  { value: 'Historical', label: 'Historical (Sejarah)' },
+  { value: 'Musical', label: 'Musical (Musikal)' },
+  { value: 'Adventure', label: 'Adventure (Petualangan)' },
+  { value: 'Crime', label: 'Crime (Kriminal)' },
+];
+
+
+// Standard Negative Prompts
+const NEGATIVE_INSTRUCTIONS_ID_MULTILINE = `Do not include any text overlays, subtitles, watermarks, or logos. No on-screen writing of any kind.
+The video must be clean, realistic, and cinematic.
+Avoid all visual artifacts such as blur, noise, shadow ghosts, or motion inconsistencies.
+Ensure every frame is consistently sharp, clear, and visually coherent with no glitches or style shifts.`;
+
+const NEGATIVE_INSTRUCTIONS_EN_MULTILINE = `Do not include any text overlays, subtitles, watermarks, or logos. No on-screen writing of any kind.
+The video must be clean, realistic, and cinematic.
+Avoid all visual artifacts such as blur, noise, shadow ghosts, or motion inconsistencies.
+Ensure every frame is consistently sharp, clear, and visually coherent with no glitches or style shifts.`;
+
+const NEGATIVE_KEYWORDS_ID = "text, subtitle, logo, watermark, blurry, motion blur, ghosting, visual distortion, inconsistent style, tulisan, teks, logo, cap air";
+const NEGATIVE_KEYWORDS_EN = "text, subtitle, logo, watermark, blurry, motion blur, ghosting, visual distortion, inconsistent style";
+
+// Hollywood Style Specific Negative Prompts
+const HOLLYWOOD_NEGATIVE_INSTRUCTIONS_ID_MULTILINE = `The video must be clean and cinematic, avoiding unintended visual artifacts such as excessive blur (unless stylistically applied like motion blur), noise, or shadow ghosts.
+Ensure every frame is consistently sharp, clear, and visually coherent within the intended Hollywood style.`;
+
+const HOLLYWOOD_NEGATIVE_INSTRUCTIONS_EN_MULTILINE = `The video must be clean and cinematic, avoiding unintended visual artifacts such as excessive blur (unless stylistically applied like motion blur), noise, or shadow ghosts.
+Ensure every frame is consistently sharp, clear, and visually coherent within the intended Hollywood style.`;
+
+const HOLLYWOOD_NEGATIVE_KEYWORDS_ID = "unwanted blur, excessive noise, bad composition, poor lighting (if not stylistic), deformed, ugly, bad anatomy, buram yang tidak diinginkan, noise berlebih, komposisi buruk";
+const HOLLYWOOD_NEGATIVE_KEYWORDS_EN = "unwanted blur, excessive noise, bad composition, poor lighting (if not stylistic), deformed, ugly, bad anatomy";
+
+
+// Tooltip Component
+const Tooltip = ({ text, children }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  return (
+    <div className="relative flex items-center group"> 
+      {children}
+      <div
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className="ml-2 cursor-pointer"
+      >
+        <HelpCircle size={16} className="text-indigo-300 group-hover:text-yellow-300 transition-colors" />
+      </div>
+      {showTooltip && (
+        <div className="absolute left-full ml-3 w-64 p-3 bg-slate-800 text-gray-200 text-xs rounded-md shadow-lg z-50 break-words transform translate-y-[-50%] top-[50%] border border-indigo-700">
+          {text}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// AccordionItem Component - Styled for the new theme
+const AccordionItem = ({ title, children, initiallyOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(initiallyOpen);
+
+  return (
+    <div className="border border-indigo-700 rounded-lg mb-3 overflow-hidden shadow-md bg-indigo-900/50">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex justify-between items-center p-4 bg-indigo-800/70 hover:bg-indigo-700/70 focus:outline-none transition-colors"
+      >
+        <span className="font-lora font-semibold text-yellow-300 text-lg">{title}</span>
+        {isOpen ? <ChevronUp size={20} className="text-yellow-300" /> : <ChevronDown size={20} className="text-yellow-300" />}
+      </button>
+      {isOpen && (
+        <div className="p-4 sm:p-6 border-t border-indigo-700 bg-indigo-900/30">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+// ModeArsitek (Previously ManualPromptBuilder) - Styled for the new theme
+const ModeArsitek = () => {
+  const [subject, setSubject] = useState('');
+  const [action, setAction] = useState('');
+  const [expression, setExpression] = useState('');
+  const [place, setPlace] = useState('');
+  const [time, setTime] = useState('');
+  const [cameraMovement, setCameraMovement] = useState('');
+  const [lighting, setLighting] = useState('');
+  const [videoStyle, setVideoStyle] = useState(''); 
+  const [videoAtmosphere, setVideoAtmosphere] = useState(''); 
+  const [soundOrMusic, setSoundOrMusic] = useState('');
+  const [spokenSentences, setSpokenSentences] = useState('');
+  const [additionalDetails, setAdditionalDetails] = useState('');
+  const [customNegativeKeywords, setCustomNegativeKeywords] = useState(''); 
+  
+  const [applyHollywoodStyle, setApplyHollywoodStyle] = useState(false); 
+
+  const [corePromptPreviewID, setCorePromptPreviewID] = useState(''); 
+  const [corePromptPreviewEN, setCorePromptPreviewEN] = useState(''); 
+
+  const [generatedPromptID, setGeneratedPromptID] = useState('');
+  const [generatedPromptEN, setGeneratedPromptEN] = useState('');
+  const [showCopySuccessID, setShowCopySuccessID] = useState(false);
+  const [showCopySuccessEN, setShowCopySuccessEN] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isLoadingTranslation, setIsLoadingTranslation] = useState(false);
+  const [llmError, setLlmError] = useState('');
+
+  // --- Input, Label, Select classes for ModeArsitek ---
+  const baseInputClass = "w-full p-3 rounded-md transition duration-200 ease-in-out";
+  const themedInputClass = `${baseInputClass} bg-slate-800 text-gray-100 border border-indigo-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 placeholder-gray-500`;
+  const themedSelectClass = `${themedInputClass} appearance-none cursor-pointer`;
+  const themedLabelClass = "block text-indigo-200 text-sm font-bold mb-2 font-inter";
+  const themedSectionTitleClass = "text-2xl font-lora font-bold text-yellow-300 mb-6 text-center";
+  const themedPreviewTextareaClass = "w-full p-3 border rounded-md text-sm min-h-[100px] resize-y whitespace-pre-wrap bg-slate-800/50 border-indigo-600 text-gray-300";
+
+  const constructHollywoodPromptID = () => {
+    const envTime = time || "golden hour";
+    const envWeatherMood = videoStyle || "dramatic and moody"; 
+    const camMove = cameraMovement || "dynamic dolly zoom"; 
+    const mainSub = subject || "a mysterious figure";
+    const mainAct = action || "performing a significant action";
+    const mainExp = expression ? ` with an expression of ${expression}` : "";
+    const lightStyle = lighting || "god rays and rim lighting";
+    const atmosphereElements = videoAtmosphere || "cinematic fog and dust particles";
+    const sound = soundOrMusic || "epic trailer music style";
+    const userPlace = place || "a stunning location";
+  
+    const secondarySubjectAction = "a shocking revelation"; 
+    const finalShotDesc = "an iconic, lingering shot of the aftermath"; 
+  
+    const dialogSegment = spokenSentences ? ` with dialogue: "${spokenSentences}"` : "";
+    const additionalDetailsSegment = additionalDetails ? `, ${additionalDetails}` : "";
+  
+    return `An 8-second cinematic scene in the style of a high-budget Hollywood film. ${userPlace} during ${envTime}, ${envWeatherMood}. The camera uses a ${camMove}, capturing ${mainSub} as ${mainAct}${mainExp}${dialogSegment}. Intense lighting with ${lightStyle}, and teal & orange color grading. Atmosphere includes ${atmosphereElements}, with cinematic lens flares and motion blur. Quick dramatic cut to ${secondarySubjectAction}, then ${finalShotDesc}${additionalDetailsSegment}. Ends with a bold glitch transition and a title/logo overlay. Aspect ratio 2.39:1, film grain texture, smooth camera motion, deep contrast, epic sound design and ${sound}.`;
+  };
+
+  const generatePrompt = () => {
+    let corePromptContent;
+    let finalNegativeInstructionsID;
+    let finalNegativeKeywordsID;
+
+    if (applyHollywoodStyle) {
+      corePromptContent = constructHollywoodPromptID();
+      finalNegativeInstructionsID = HOLLYWOOD_NEGATIVE_INSTRUCTIONS_ID_MULTILINE;
+      finalNegativeKeywordsID = customNegativeKeywords.trim() 
+        ? `${customNegativeKeywords.trim()}, ${HOLLYWOOD_NEGATIVE_KEYWORDS_ID}`
+        : HOLLYWOOD_NEGATIVE_KEYWORDS_ID;
+    } else {
+      let promptParts = [];
+      if (subject) promptParts.push(`Sebuah video menampilkan ${subject}`);
+      else promptParts.push(`Sebuah video`);
+      if (action) promptParts.push(`yang sedang ${action}`);
+      if (expression) promptParts.push(`dengan ekspresi ${expression}`);
+      if (place) promptParts.push(`berlokasi di ${place}`);
+      if (time) promptParts.push(`pada ${time.toLowerCase()}`);
+      if (cameraMovement) promptParts.push(`dengan gerakan kamera ${cameraMovement.toLowerCase()}`);
+      if (lighting) promptParts.push(`pencahayaan ${lighting.toLowerCase()}`);
+      if (videoStyle) promptParts.push(`bergaya ${videoStyle.toLowerCase()}`);
+      if (videoAtmosphere) promptParts.push(`menciptakan suasana ${videoAtmosphere.toLowerCase()}`);
+      if (soundOrMusic) promptParts.push(`diiringi suara atau musik ${soundOrMusic.toLowerCase()}`);
+      if (spokenSentences) promptParts.push(`dengan dialog: "${spokenSentences}"`);
+      if (additionalDetails) promptParts.push(`detail tambahan: ${additionalDetails}`);
+      
+      corePromptContent = promptParts.join(', ');
+      corePromptContent = corePromptContent.charAt(0).toUpperCase() + corePromptContent.slice(1);
+      
+      finalNegativeInstructionsID = NEGATIVE_INSTRUCTIONS_ID_MULTILINE;
+      finalNegativeKeywordsID = customNegativeKeywords.trim()
+        ? `${customNegativeKeywords.trim()}, ${NEGATIVE_KEYWORDS_ID}`
+        : NEGATIVE_KEYWORDS_ID;
+    }
+    
+    setCorePromptPreviewID(corePromptContent); 
+
+    const finalPrompt = `${corePromptContent}\n\n${finalNegativeInstructionsID}\n\nNegative prompts: ${finalNegativeKeywordsID}`;
+    setGeneratedPromptID(finalPrompt);
+  };
+
+  useEffect(() => { generatePrompt(); }, [subject, action, expression, place, time, cameraMovement, lighting, videoStyle, videoAtmosphere, soundOrMusic, spokenSentences, additionalDetails, customNegativeKeywords, applyHollywoodStyle]);
+  
+  useEffect(() => {
+    if (generatedPromptID) { 
+      const negativeBoundary = applyHollywoodStyle 
+        ? `\n\n${HOLLYWOOD_NEGATIVE_INSTRUCTIONS_ID_MULTILINE}` 
+        : `\n\n${NEGATIVE_INSTRUCTIONS_ID_MULTILINE}`;
+      const coreContentForTranslation = generatedPromptID.split(negativeBoundary)[0];
+      translatePrompt(coreContentForTranslation, customNegativeKeywords, applyHollywoodStyle);
+    } else {
+      setGeneratedPromptEN('');
+      setCorePromptPreviewEN(''); 
+    }
+  }, [generatedPromptID, customNegativeKeywords, applyHollywoodStyle]); 
+
+  const copyToClipboardHelper = (text, setSuccess) => {
+    if (text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 2000);
+      } catch (err) { console.error('Failed to copy text: ', err); }
+      document.body.removeChild(textarea);
+    }
+  };
+  const copyIDToClipboard = () => copyToClipboardHelper(generatedPromptID, setShowCopySuccessID);
+  const copyENToClipboard = () => copyToClipboardHelper(generatedPromptEN, setShowCopySuccessEN);
+
+  const suggestAdditionalDetails = async () => {
+    setLlmError(''); 
+    setIsLoadingSuggestions(true); 
+    const currentPromptElements = [ subject && `Subject: ${subject}`, action && `Action: ${action}`, expression && `Expression: ${expression}`, place && `Place: ${place}`, time && `Time: ${time}`, cameraMovement && `Camera Movement: ${cameraMovement}`, lighting && `Lighting: ${lighting}`, videoStyle && `Video Style: ${videoStyle}`, videoAtmosphere && `Video Atmosphere: ${videoAtmosphere}`, soundOrMusic && `Sound/Music: ${soundOrMusic}`, ].filter(Boolean).join('; ');
+    const prompt = `Given the following video description elements: "${currentPromptElements}", suggest a comma-separated list of 5-10 additional descriptive keywords or phrases in English that would enhance a text-to-video prompt. Focus on intricate details, atmosphere, cinematic qualities, and visual enhancements. Do not include any introductory or concluding sentences, just the keywords.`;
+    let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+    const payload = { contents: chatHistory }; const apiKey = ""; 
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+      const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!response.ok) {
+        const errorBody = await response.text();
+        let detailedError = `HTTP error! status: ${response.status} (suggestions)`;
+        if (response.status === 401 || response.status === 403) { detailedError += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; }
+        throw new Error(detailedError);
+      }
+      const result = await response.json();
+      if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const suggestedText = result.candidates[0].content.parts[0].text.trim();
+        setAdditionalDetails(prev => prev ? `${prev}, ${suggestedText}` : suggestedText);
+      } else { setLlmError('Gagal mendapatkan sugesti dari AI.'); console.error('LLM suggestion response unexpected:', result); }
+    } catch (error) { setLlmError(`Error mengambil sugesti: ${error.message}`); console.error('Error in suggestAdditionalDetails:', error); } 
+    finally { setIsLoadingSuggestions(false); }
+  };
+
+  const translatePrompt = async (corePromptID, userCustomKeywordsID, isHollywoodStyle) => {
+    setLlmError(''); 
+    setIsLoadingTranslation(true); 
+
+    const spokenSentenceMatch = corePromptID.match(/dengan dialog: "(.*?)"/);
+    const spokenSentenceContent = spokenSentenceMatch ? spokenSentenceMatch[1] : '';
+    
+    let mainCorePromptID = corePromptID;
+    if (spokenSentenceMatch) {
+      mainCorePromptID = mainCorePromptID.replace(spokenSentenceMatch[0], '').trim();
+      if (mainCorePromptID.endsWith(',')) mainCorePromptID = mainCorePromptID.slice(0, -1).trim();
+    }
+
+    const apiKey = ""; 
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    try {
+      const mainPromptTranslationInstruction = `Translate the following Indonesian text into English. Maintain a natural, cinematic tone. Do NOT translate any text that is enclosed within double quotes (like "this example") if it represents spoken dialogue.\n\nIndonesian text: "${mainCorePromptID}"`;
+      let chatHistoryMain = [{ role: "user", parts: [{ text: mainPromptTranslationInstruction }] }];
+      const payloadMain = { contents: chatHistoryMain };
+      
+      const responseMain = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadMain) });
+      if (!responseMain.ok) {
+        const errorBody = await responseMain.text();
+        let detailedError = `HTTP error! status: ${responseMain.status} (main prompt)`;
+        if (responseMain.status === 401 || responseMain.status === 403) { detailedError += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; }
+        throw new Error(detailedError);
+      }
+      const resultMain = await responseMain.json();
+      
+      let translatedCorePrompt = '';
+      if (resultMain.candidates?.[0]?.content?.parts?.[0]?.text) {
+        translatedCorePrompt = resultMain.candidates[0].content.parts[0].text.trim();
+        setCorePromptPreviewEN(translatedCorePrompt); 
+      } else {
+        setCorePromptPreviewEN('Gagal menerjemahkan inti prompt.'); 
+        throw new Error('Gagal menerjemahkan bagian utama prompt.');
+      }
+
+      let translatedUserCustomKeywords = '';
+      if (userCustomKeywordsID.trim()) {
+        const customKeywordsTranslationInstruction = `Translate the following Indonesian keywords (comma-separated list) into English keywords (comma-separated list).\n\nIndonesian keywords: "${userCustomKeywordsID}"`;
+        let chatHistoryKeywords = [{ role: "user", parts: [{ text: customKeywordsTranslationInstruction }] }];
+        const payloadKeywords = { contents: chatHistoryKeywords };
+        const responseKeywords = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadKeywords) });
+        if (!responseKeywords.ok) {
+            translatedUserCustomKeywords = userCustomKeywordsID; 
+        } else {
+            const resultKeywords = await responseKeywords.json();
+            if (resultKeywords.candidates?.[0]?.content?.parts?.[0]?.text) {
+              translatedUserCustomKeywords = resultKeywords.candidates[0].content.parts[0].text.trim();
+            } else {
+              translatedUserCustomKeywords = userCustomKeywordsID; 
+            }
+        }
+      }
+      
+      if (spokenSentenceContent) {
+        if (translatedCorePrompt.includes('additional details:')) translatedCorePrompt = translatedCorePrompt.replace('additional details:', `with dialogue: "${spokenSentenceContent}", additional details:`);
+        else if (translatedCorePrompt.includes('creating an atmosphere')) translatedCorePrompt += `, with dialogue: "${spokenSentenceContent}"`;
+        else translatedCorePrompt += `, with dialogue: "${spokenSentenceContent}"`;
+      }
+
+      const finalNegativeInstructionsEN = isHollywoodStyle ? HOLLYWOOD_NEGATIVE_INSTRUCTIONS_EN_MULTILINE : NEGATIVE_INSTRUCTIONS_EN_MULTILINE;
+      let baseNegativeKeywordsEN = isHollywoodStyle ? HOLLYWOOD_NEGATIVE_KEYWORDS_EN : NEGATIVE_KEYWORDS_EN;
+      
+      let combinedKeywordsEN = baseNegativeKeywordsEN;
+      if (translatedUserCustomKeywords.trim()) {
+          combinedKeywordsEN = `${translatedUserCustomKeywords.trim()}, ${baseNegativeKeywordsEN}`;
+      }
+      
+      setGeneratedPromptEN(`${translatedCorePrompt}\n\n${finalNegativeInstructionsEN}\n\nNegative prompts: ${combinedKeywordsEN}`);
+
+    } catch (error) { 
+      let displayError = `Error menerjemahkan prompt: ${error.message}`; 
+      setLlmError(displayError); 
+      
+      const fallbackNegativeInstructionsEN = isHollywoodStyle ? HOLLYWOOD_NEGATIVE_INSTRUCTIONS_EN_MULTILINE : NEGATIVE_INSTRUCTIONS_EN_MULTILINE;
+      let fallbackBaseKeywordsEN = isHollywoodStyle ? HOLLYWOOD_NEGATIVE_KEYWORDS_EN : NEGATIVE_KEYWORDS_EN;
+      let fallbackKeywordsEN = fallbackBaseKeywordsEN;
+      if (userCustomKeywordsID.trim()) fallbackKeywordsEN = `${userCustomKeywordsID}, ${fallbackBaseKeywordsEN}`; 
+
+      setGeneratedPromptEN(`${mainCorePromptID}${spokenSentenceContent ? `, dengan dialog: "${spokenSentenceContent}"` : ''}\n\n${fallbackNegativeInstructionsEN}\n\nNegative prompts: ${fallbackKeywordsEN} (Error Terjemahan)`);
+      if (!corePromptPreviewEN && mainCorePromptID) setCorePromptPreviewEN(mainCorePromptID + " (Asli - Error Terjemahan)"); 
+    }
+    finally { setIsLoadingTranslation(false); }
+  };
+
+  return (
+    <div className="p-6 sm:p-8 md:p-10 rounded-b-xl w-full max-w-5xl">
+      <h2 className={`${themedSectionTitleClass} font-lora`}>Mode Arsitek Prompt</h2>
+      <p className="text-center text-indigo-200 mb-8 max-w-2xl mx-auto">Rancang prompt video Anda secara manual dengan detail elemen sinematik. Setiap input akan membentuk narasi visual yang kaya.</p>
+      
+      <div className="mb-6 p-4 border border-yellow-500/50 bg-yellow-900/20 rounded-lg">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="hollywoodStyleToggle"
+            checked={applyHollywoodStyle}
+            onChange={(e) => setApplyHollywoodStyle(e.target.checked)}
+            className="h-4 w-4 text-yellow-400 border-indigo-500 rounded focus:ring-yellow-500 bg-slate-700"
+          />
+          <label htmlFor="hollywoodStyleToggle" className="ml-2 text-sm font-medium text-yellow-300">
+            Terapkan Gaya Hollywood (Eksperimental)
+          </label>
+          <Tooltip text="Mengaktifkan ini akan mengubah struktur prompt agar sesuai dengan template gaya film Hollywood, termasuk efek seperti glitch dan overlay judul/logo. Perintah negatif standar akan disesuaikan.">
+            <span className="ml-1"></span>
+          </Tooltip>
+        </div>
+        {applyHollywoodStyle && (
+            <p className="mt-2 text-xs text-yellow-400">
+                Catatan: Gaya Hollywood akan menambahkan elemen seperti "glitch transition" dan "title/logo overlay" sesuai template. Input Anda akan diintegrasikan ke dalam template ini.
+            </p>
+        )}
+      </div>
+      
+      <div className="space-y-1"> 
+        <AccordionItem title="1. Deskripsi Utama Video" initiallyOpen={true}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="subject" className={themedLabelClass}>Subjek</label>
+              <input id="subject" type="text" className={themedInputClass} placeholder="e.g., seekor naga megah..." value={subject} onChange={(e) => setSubject(e.target.value)} />
+            </div>
+            <div>
+              <label htmlFor="action" className={themedLabelClass}>Aksi</label>
+              <input id="action" type="text" className={themedInputClass} placeholder="e.g., terbang di atas pegunungan..." value={action} onChange={(e) => setAction(e.target.value)} />
+            </div>
+            <div>
+              <label htmlFor="expression" className={themedLabelClass}>Ekspresi</label>
+              <input id="expression" type="text" className={themedInputClass} placeholder="e.g., sedih, gembira..." value={expression} onChange={(e) => setExpression(e.target.value)} />
+            </div>
+            <div>
+              <label htmlFor="place" className={themedLabelClass}>Tempat</label>
+              <input id="place" type="text" className={themedInputClass} placeholder="e.g., di kota futuristik..." value={place} onChange={(e) => setPlace(e.target.value)} />
+            </div>
+          </div>
+        </AccordionItem>
+
+        <AccordionItem title="2. Waktu & Kamera">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Tooltip text="Pilih waktu kejadian dalam video. 'Golden Hour' adalah periode singkat setelah matahari terbit atau sebelum matahari terbenam dengan cahaya kemerahan. 'Blue Hour' adalah periode senja saat langit berwarna biru tua.">
+                  <label htmlFor="time" className={themedLabelClass}>Waktu</label>
+              </Tooltip>
+              <div className="relative">
+                <select id="time" className={themedSelectClass} value={time} onChange={(e) => setTime(e.target.value)}>{timeOptions.map((o) => (<option key={o.value} value={o.value} className="bg-slate-800 text-gray-200">{o.label}</option>))}</select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-300"><ChevronDown size={18}/></div>
+              </div>
+            </div>
+            <div>
+              <Tooltip text="Pilih jenis gerakan kamera. Contoh: 'Dolly In' menggerakkan kamera mendekat ke subjek, 'Pan' menggeser kamera secara horizontal, 'FPV Drone Movement' mensimulasikan gerakan drone yang lincah.">
+                <label htmlFor="cameraMovement" className={themedLabelClass}>Gerakan Kamera</label>
+              </Tooltip>
+              <div className="relative">
+                <select id="cameraMovement" className={themedSelectClass} value={cameraMovement} onChange={(e) => setCameraMovement(e.target.value)}>{cameraMovementOptions.map((o) => (<option key={o.value} value={o.value} className="bg-slate-800 text-gray-200">{o.label}</option>))}</select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-300"><ChevronDown size={18}/></div>
+              </div>
+            </div>
+          </div>
+        </AccordionItem>
+
+        <AccordionItem title="3. Gaya Visual & Suasana">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label htmlFor="lighting" className={themedLabelClass}>Pencahayaan</label>
+                    <input id="lighting" type="text" className={themedInputClass} placeholder="e.g., golden hour, rembrandt lighting..." value={lighting} onChange={(e) => setLighting(e.target.value)} />
+                </div>
+                <div>
+                    <Tooltip text="Tentukan gaya visual video (misalnya 'sinematik', 'gaya anime', 'dokumenter') atau deskripsikan mood/cuaca jika menggunakan Gaya Hollywood (misalnya 'dramatic and moody', 'stormy weather').">
+                        <label htmlFor="videoStyle" className={themedLabelClass}>Gaya Video / Mood</label>
+                    </Tooltip>
+                    <input id="videoStyle" type="text" className={themedInputClass} placeholder="e.g., sinematik, gaya anime / dramatic and moody" value={videoStyle} onChange={(e) => setVideoStyle(e.target.value)} />
+                </div>
+                <div className="md:col-span-2"> 
+                     <Tooltip text="Deskripsikan elemen atmosferik seperti 'kabut tebal', 'hujan deras', 'partikel debu beterbangan', 'puing-puing berjatuhan'.">
+                        <label htmlFor="videoAtmosphere" className={themedLabelClass}>Atmosfer Video</label>
+                    </Tooltip>
+                    <input id="videoAtmosphere" type="text" className={themedInputClass} placeholder="e.g., misterius, ceria / kabut tebal, hujan..." value={videoAtmosphere} onChange={(e) => setVideoAtmosphere(e.target.value)} />
+                </div>
+            </div>
+        </AccordionItem>
+
+        <AccordionItem title="4. Audio & Detail Lainnya">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label htmlFor="soundOrMusic" className={themedLabelClass}>Suara atau Musik</label>
+                    <input id="soundOrMusic" type="text" className={themedInputClass} placeholder="e.g., melodi orkestra epik..." value={soundOrMusic} onChange={(e) => setSoundOrMusic(e.target.value)} />
+                </div>
+                <div>
+                    <label htmlFor="spokenSentences" className={themedLabelClass}>Kalimat yang Diucapkan</label>
+                    <input id="spokenSentences" type="text" className={themedInputClass} placeholder="e.g., 'Selamat datang...'" value={spokenSentences} onChange={(e) => setSpokenSentences(e.target.value)} />
+                </div>
+                <div className="md:col-span-2">
+                    <label htmlFor="additionalDetails" className={themedLabelClass}>Detail Tambahan</label>
+                    <div className="flex items-center gap-2">
+                        <input id="additionalDetails" type="text" className={themedInputClass} placeholder="e.g., sangat detail, 8k..." value={additionalDetails} onChange={(e) => setAdditionalDetails(e.target.value)} />
+                        <button onClick={suggestAdditionalDetails} className="flex-shrink-0 bg-purple-600 text-white p-3 rounded-md shadow-md hover:bg-purple-700 disabled:opacity-50" disabled={isLoadingSuggestions} title="Suggest additional details">
+                            {isLoadingSuggestions ? (<span className="animate-spin h-5 w-5 border-t-2 border-white rounded-full"></span>) : (<Sparkles size={20} />)}
+                        </button>
+                    </div>
+                    {llmError && (<div className="mt-2 text-red-400 text-sm flex items-center"><XCircle size={16} className="mr-1" />{llmError}</div>)}
+                </div>
+            </div>
+        </AccordionItem>
+
+        <AccordionItem title="5. Pengaturan Kata Kunci Negatif">
+            <div> 
+                <Tooltip text="Masukkan kata kunci tambahan yang ingin Anda hindari dalam video, dipisahkan koma. Ini akan ditambahkan ke daftar kata kunci negatif standar (text, subtitle, logo, watermark, blurry, dll.).">
+                    <label htmlFor="customNegativeKeywords" className={themedLabelClass}>Custom Negative Keywords (Tambahan)</label>
+                </Tooltip>
+                <input id="customNegativeKeywords" type="text" className={themedInputClass} placeholder="e.g., hindari warna merah, objek terbang..." value={customNegativeKeywords} onChange={(e) => setCustomNegativeKeywords(e.target.value)} />
+            </div>
+        </AccordionItem>
+      </div> 
+
+      <div className="my-8 p-4 border border-blue-500/50 bg-blue-900/20 rounded-lg">
+        <div className="flex items-center mb-3">
+            <Eye size={20} className="text-blue-300 mr-2" />
+            <h3 className="text-lg font-lora font-semibold text-blue-200">Pratinjau Inti Prompt</h3>
+        </div>
+        <p className="text-xs text-indigo-300 mb-4">Ini adalah pratinjau bagian deskriptif utama dari prompt Anda. Instruksi negatif standar dan kata kunci negatif akan ditambahkan secara otomatis pada hasil akhir di bawah.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label className="block text-sm font-medium text-indigo-200 mb-1">Versi Indonesia:</label>
+                <textarea className={themedPreviewTextareaClass} value={corePromptPreviewID} readOnly placeholder="Pratinjau inti prompt (ID)..."></textarea>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-indigo-200 mb-1">Versi Inggris:</label>
+                <textarea className={themedPreviewTextareaClass} value={corePromptPreviewEN} readOnly placeholder="Pratinjau inti prompt (EN)..."></textarea>
+            </div>
+        </div>
+      </div>
+
+      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h3 className={`${themedSectionTitleClass} text-left !text-xl !mb-3`}>Prompt Final (Bahasa Indonesia)</h3>
+            <div className="relative">
+                <textarea className={`${themedInputClass} min-h-[180px] sm:min-h-[200px] resize-y whitespace-pre-wrap`} value={generatedPromptID} onChange={(e) => setGeneratedPromptID(e.target.value)} placeholder="Prompt Anda akan muncul di sini..."></textarea>
+                <button onClick={copyIDToClipboard} className="absolute top-3 right-3 p-2 bg-indigo-700 rounded-md hover:bg-indigo-600" title="Salin Prompt Indonesia">
+                    <Copy size={18} className="text-yellow-300" />
+                </button>
+                {showCopySuccessID && (<span className="absolute bottom-3 right-3 text-green-400 text-xs animate-fade-in-out">Tersalin!</span>)}
+            </div>
+        </div>
+        <div>
+            <h3 className={`${themedSectionTitleClass} text-left !text-xl !mb-3`}>Prompt Final (Bahasa Inggris)</h3>
+            <div className="relative">
+                <textarea className={`${themedInputClass} min-h-[180px] sm:min-h-[200px] resize-y bg-slate-800/70 text-gray-300 whitespace-pre-wrap`} value={isLoadingTranslation ? "Menerjemahkan..." : generatedPromptEN} readOnly placeholder="Hasil terjemahan akan muncul di sini..."></textarea>
+                <button onClick={copyENToClipboard} className="absolute top-3 right-3 p-2 bg-indigo-700 rounded-md hover:bg-indigo-600" title="Salin Prompt Inggris">
+                    <Copy size={18} className="text-yellow-300" />
+                </button>
+                {showCopySuccessEN && (<span className="absolute bottom-3 right-12 text-green-400 text-xs animate-fade-in-out">Tersalin!</span>)}
+                {isLoadingTranslation && (<div className="absolute inset-0 flex items-center justify-center bg-slate-800/50 rounded-md"><span className="animate-spin h-8 w-8 border-t-4 border-yellow-400 rounded-full"></span></div>)}
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const initialConceptState = {
+    judul: '', deskripsi: '', lokasi: '', objek: [], dialog: [], tujuan: '', 
+    specificPromptID: '', isLoadingSpecificID: false, errorSpecificID: '', showCopySpecificID: false,
+    specificPromptEN: '', isLoadingSpecificEN: false, errorSpecificEN: '', showCopySpecificEN: false,
+    simplePromptID: '', isLoadingSimpleID: false, errorSimpleID: '', showCopySimpleID: false,
+    simplePromptEN: '', isLoadingSimpleEN: false, errorSimpleEN: '', showCopySimpleEN: false,
+    narasi: '', struktur_cerita: [], prompt_visual: [], 
+    kalimat_pembuka: '', list_fakta: [], kalimat_penutup: '', 
+    prompt_video_ai: '', format_editing: '', rekomendasi_musik: '', 
+    copywriting: '', gaya_iklan: '', 
+    rawText: null, 
+    clipNumber: null, sceneSummary: '', visualDetails: '', dialogueOrNarrative: '', technicalInstructions: '', emotionalTheme: '',
+};
+
+const WORLD_BUILDER_AI_PROMPT_BASE = `Bertindaklah sebagai seorang ahli multi-disiplin dalam produksi film, mencakup peran sebagai Scriptwriter, Copywriter, Developer, Programmer, Video Producer, dan Creative Director. Tugasmu adalah membuat detail lengkap dunia cerita film berdasarkan instruksi user. Fokus pada 3 hal utama:
+
+1. Detail Karakter Tokoh
+   Buat deskripsi karakter mendalam berdasarkan nama karakter yang diberikan user. Untuk setiap karakter, sertakan informasi seperti:
+   - Nama Input Pengguna: (Nama asli yang diberikan pengguna)
+   - Nama Lengkap dan Panggilan: (Nama lengkap karakter dan panggilannya dalam cerita)
+   - Umur: (Usia karakter, bisa perkiraan jika tidak spesifik)
+   - Jenis Kelamin: 
+   - Penampilan Fisik: (Deskripsi detail visual, postur, wajah, rambut, mata, ciri khas)
+   - Kepribadian dan Ciri Khas Perilaku: (Sifat utama, bagaimana mereka bertindak, kebiasaan)
+   - Latar Belakang atau Origin Story: (Kisah masa lalu singkat yang membentuk mereka)
+   - Outfit Khas atau Signature Look: (Pakaian yang sering dikenakan, gaya berpakaian)
+   - Skill, Senjata, atau Kekuatan Khusus: (Kemampuan unik, jika ada)
+   - Motivasi: (Apa yang mendorong tindakan mereka dalam cerita)
+   - Konflik Batin: (Dilema internal yang mereka hadapi)
+
+2. Detail Lokasi Tempat (Setting)
+   Gambarkan tempat utama dalam cerita yang disebutkan user dengan sangat visual dan sinematik. Untuk setiap lokasi, sertakan:
+   - Nama Input Pengguna: (Nama asli yang diberikan pengguna)
+   - Nama Tempat dalam Cerita: (Nama resmi lokasi dalam narasi)
+   - Gaya Arsitektur atau Visual: (Deskripsi bangunan, pemandangan alam, teknologi)
+   - Suasana Lingkungan dan Warna Dominan: (Mood tempat tersebut, palet warna utama)
+   - Waktu dan Cuaca Khas: (Periode waktu yang sering digambarkan, kondisi cuaca umum)
+   - Aktivitas atau Kehidupan Sosial di Tempat Itu: (Apa yang biasanya terjadi di sana)
+
+3. Detail Objek / Aksesori / Hewan Peliharaan Penting dalam Film
+   Buat daftar dan deskripsi benda-benda atau hewan peliharaan penting yang disebutkan user dan menjadi identitas film. Untuk setiap item/hewan:
+   - Nama Input Pengguna: (Nama asli yang diberikan pengguna)
+   - Nama Item/Hewan dalam Cerita: 
+   - Jenis: (Misalnya: Senjata legendaris, Simbol, Jimat, Kendaraan ikonik, Aksesori karakter, Teknologi, Artefak, Hewan peliharaan magis, dll.)
+   - Deskripsi Detail: (Penampilan fisik, fungsi, kemampuan khusus jika ada)
+   - Signifikansi dalam Cerita: (Mengapa item/hewan ini penting, perannya dalam narasi atau bagi karakter)
+
+Tulis semua deskripsi seolah-olah ini adalah bible kreatif untuk produksi film profesional. Gunakan gaya penulisan visual, deskriptif, dan siap dipakai oleh tim produksi. Pastikan setiap entitas (karakter, lokasi, objek/hewan) yang dijelaskan merujuk kembali ke "Nama Input Pengguna" agar mudah dilacak.
+`;
+
+const worldBuilderSchema = {
+  type: "OBJECT",
+  properties: {
+    "detailedCharacters": {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          "inputName": { type: "STRING" },
+          "fullName": { type: "STRING" },
+          "nickname": { type: "STRING" },
+          "age": { type: "STRING" },
+          "gender": { type: "STRING" },
+          "appearance": { type: "STRING" },
+          "personality": { type: "STRING" },
+          "background": { type: "STRING" },
+          "outfit": { type: "STRING" },
+          "skillsOrPowers": { type: "STRING" },
+          "motivation": { type: "STRING" },
+          "internalConflict": { type: "STRING" }
+        },
+        required: ["inputName", "fullName", "appearance", "personality"]
+      }
+    },
+    "detailedLocations": {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          "inputName": { type: "STRING" },
+          "placeName": { type: "STRING" },
+          "visualStyle": { type: "STRING" },
+          "atmosphere": { type: "STRING" },
+          "dominantColors": { type: "STRING" },
+          "typicalTimeWeather": { type: "STRING" },
+          "socialLifeOrActivity": { type: "STRING" }
+        },
+        required: ["inputName", "placeName", "visualStyle", "atmosphere"]
+      }
+    },
+    "detailedObjectsPets": {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          "inputName": { type: "STRING" },
+          "itemName": { type: "STRING" },
+          "itemType": { type: "STRING" },
+          "description": { type: "STRING" },
+          "significance": { type: "STRING" }
+        },
+        required: ["inputName", "itemName", "itemType", "description"]
+      }
+    }
+  }
+};
+
+
+const automaticTools = [
+    { 
+        id: 'cinematicStory', name: 'Cerita Sinematik', tagline: 'Bangun alur cerita dramatis.', icon: Film,
+        subcategories: [ { value: 'horor_kriminal', label: 'Horor & Kriminal' }, { value: 'romantis_azab', label: 'Romantis & Azab Fiksi' }, { value: 'dongeng_anak', label: 'Dongeng Anak 3D' }, { value: 'sejarah_islam_umum', label: 'Sejarah Islam & Umum' }, { value: 'cerita_viral', label: 'Cerita Viral' }, ],
+        modes: [ { value: 'basic', label: 'Basic' }, { value: 'advanced', label: 'Advanced' }, { value: 'pro', label: 'Pro' }, ],
+        outputDescription: 'Output: Konsep Cerita Awal + Kemampuan Generate Sub-Prompt (Narasi, Struktur, Visual, dll.)'
+    },
+    {
+        id: 'uniqueFacts', name: 'Fakta Unik', tagline: 'Fakta siap pakai, visual menarik.', icon: Zap,
+        subcategories: [ { value: 'sejarah_legenda', label: 'Sejarah & Legenda' }, { value: 'fantasi_fiksi', label: 'Fantasi & Fiksi' }, { value: 'uang_bisnis', label: 'Uang & Bisnis' }, { value: 'travel_tempat_unik', label: 'Travel & Tempat Unik' }, { value: 'islamic_history_teknologi', label: 'Islamic History & Teknologi' }, ],
+        modes: [ { value: 'gold', label: 'Gold (10 Fakta)' }, { value: 'silver', label: 'Silver (5 Fakta)' }, ],
+        outputDescription: 'Output: Konsep Video Fakta Awal + Kemampuan Generate Sub-Prompt (List Fakta, Scene AI, dll.)'
+    },
+    {
+        id: 'blastMode', name: 'BLAST MODE', tagline: '10 ide konsep detail + sub-prompt.', icon: Rocket,
+        subcategories: [], modes: [],
+        outputDescription: 'Output: 10 Konsep Video Detail + Kemampuan Generate Sub-Prompt Spesifik & Sederhana untuk setiap konsep.'
+    },
+    {
+        id: 'viralShortVideo', name: 'Video Pendek Viral', tagline: 'Konten cepat, visual kuat!', icon: TrendingUp,
+        subcategories: [ { value: 'pov_miniature', label: 'POV & Miniature' }, { value: 'home_design_konsep_mobil', label: 'Home Design & Konsep Mobil' }, { value: 'cerita_viral_short_selfie', label: 'Cerita Viral & Short Selfie' }, { value: 'horor_kriminal_sejarah_singkat', label: 'Horor / Kriminal / Sejarah Singkat' }, ],
+        modes: [ { value: 'free', label: 'Free' }, { value: 'basic', label: 'Basic' }, { value: 'viral_boost', label: 'Viral Boost' }, ],
+        outputDescription: 'Output: Konsep Video Viral Awal + Kemampuan Generate Sub-Prompt (Prompt AI, Editing, Musik, dll.)'
+    },
+    {
+        id: 'adsAffiliate', name: 'Iklan & Affiliate', tagline: 'Iklan sinematik yang menjual.', icon: ShoppingBag,
+        subcategories: [ { value: 'fashion', label: 'Produk Fashion (Jaket, Hoodie, Gamis, Daster)' }, { value: 'parfum_sandal', label: 'Parfum & Sandal' }, { value: 'story_iklan_cinematic', label: 'Paket Story Iklan Cinematic (Part 1–3)' }, ],
+        modes: [ { value: 'produk_tunggal', label: 'Produk Tunggal' }, { value: 'bundling', label: 'Bundling' }, { value: 'story_campaign', label: 'Story Campaign' }, ],
+        outputDescription: 'Output: Konsep Iklan Awal + Kemampuan Generate Sub-Prompt (Prompt Video, Copywriting, Gaya, dll.)'
+    },
+    { 
+        id: 'creativeDirector', name: 'Creative Director', tagline: 'Pandu prompt sinematik AI per klip.', icon: Edit3,
+        subcategories: [], 
+        modes: [], 
+        outputDescription: 'Output: Panduan pembuatan karakter, lokasi, dan prompt lengkap per klip (8 detik) + Kemampuan generate sub-prompt spesifik & sederhana per klip.'
+    },
+    {
+        id: 'worldBuilder', 
+        name: 'JAGATKISAH', 
+        tagline: 'Bangun fondasi cerita epik dengan karakter, lokasi, dan item ikonik.', 
+        icon: Gem, 
+        theme: { 
+            mainBg: 'bg-gradient-to-br from-indigo-950 via-blue-950 to-purple-950', 
+            titleText: 'text-yellow-300', 
+            labelText: 'text-indigo-200', 
+            inputText: 'text-gray-100',
+            inputBg: 'bg-indigo-800/60',
+            inputBorder: 'border-indigo-600 focus:border-yellow-400',
+            buttonBg: 'bg-yellow-500 hover:bg-yellow-400',
+            buttonText: 'text-indigo-950 font-semibold',
+            cardBg: 'bg-indigo-900/70 backdrop-blur-sm', 
+            cardBorder: 'border-yellow-500/60', 
+            cardTitle: 'text-yellow-400', 
+            cardText: 'text-indigo-100', 
+            fontFamily: 'font-lora', 
+        },
+        subcategories: [], modes: [],
+        outputDescription: 'Output: Bible kreatif duniamu: karakter, lokasi, item ikonik terperinci.'
+    }
+];
+
+// ModeSutradara (Previously AutomaticConceptGenerator) - Styled for the new theme
+const ModeSutradara = () => {
+  const [selectedToolId, setSelectedToolId] = useState(automaticTools[0].id); 
+  const [topic, setTopic] = useState(''); 
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [selectedMode, setSelectedMode] = useState('');
+  
+  const [generatedConceptOutput, setGeneratedConceptOutput] = useState(null); 
+  const [blastModeConcepts, setBlastModeConcepts] = useState([]); 
+  const [creativeDirectorClips, setCreativeDirectorClips] = useState([]);
+  const [creativeDirectorInputs, setCreativeDirectorInputs] = useState({
+    generalConceptTitle: '', shortDescription: '', purpose: '', genre: '', 
+    numberOfClips: 1, 
+    masterCharacters: [{ id: 1, name: '', description: '', isLoading: false }],
+    masterObjects: [{ id: 1, name: '', description: '', isLoading: false }],
+    mainLocation: '', 
+    additionalInstructions: ''
+  });
+  const [worldBuilderInputs, setWorldBuilderInputs] = useState({
+    projectTitle: '', characterNames: '', locationNames: '', objectPetNames: '',
+    overallTone: '', additionalInstructions: ''
+  });
+  const [worldBuilderOutput, setWorldBuilderOutput] = useState(null);
+  const [includeJagatkisahInCD, setIncludeJagatkisahInCD] = useState(false); 
+
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [subPromptCopySuccess, setSubPromptCopySuccess] = useState(''); 
+
+  const currentTool = automaticTools.find(tool => tool.id === selectedToolId);
+  const jagatkisahTheme = currentTool?.id === 'worldBuilder' ? currentTool.theme : null;
+  
+  // Global themed classes for ModeSutradara inputs and labels (unless overridden by JAGATKISAH)
+  const globalLabelClass = "block text-indigo-200 text-sm font-bold mb-2 font-inter";
+  const globalInputClassBase = "w-full p-3 rounded-md transition duration-200 ease-in-out placeholder-gray-500";
+  const globalInputClass = `${globalInputClassBase} bg-slate-800 text-gray-100 border border-indigo-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400`;
+  const globalTextareaClass = `${globalInputClass} min-h-[80px]`;
+  const globalSelectClass = `${globalInputClass} appearance-none cursor-pointer`;
+  const globalButtonClass = "flex items-center justify-center px-8 py-3 bg-yellow-500 text-indigo-950 font-semibold rounded-md shadow-lg hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-opacity-75 transition duration-200 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed";
+  const globalCardClass = "bg-slate-800/70 border border-indigo-700 rounded-lg p-4 sm:p-6 shadow-xl";
+  const globalCardTitleClass = "font-lora text-xl font-bold text-yellow-300 mb-2";
+  const globalCardTextClass = "text-sm text-indigo-100";
+  const globalSubPromptButtonClass = "flex items-center justify-center px-3 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded-md shadow hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60 w-full";
+  const globalSubPromptTextareaClass = `w-full p-2 border rounded-md resize-y bg-slate-700 text-gray-300 text-xs min-h-[90px] border-indigo-600`;
+
+  // useRef to track previous selectedToolId to ensure resets only happen on actual tool change
+  const prevSelectedToolIdRef = useRef(selectedToolId);
+
+  useEffect(() => {
+    // General resets that are safe on any tool change
+    if (currentTool) { // Ensure currentTool is defined
+        setSelectedSubcategory(currentTool.subcategories.length > 0 ? currentTool.subcategories[0].value : '');
+        setSelectedMode(currentTool.modes.length > 0 ? currentTool.modes[0].value : '');
+    }
+    setGeneratedConceptOutput(null);
+    setBlastModeConcepts([]);
+    setCreativeDirectorClips([]); // Always reset clips when tool might change
+    setError('');
+    setTopic(''); // Always reset generic topic when tool might change
+
+    // Only perform input resets if the tool ID has *actually changed*
+    if (prevSelectedToolIdRef.current !== selectedToolId) {
+        if (selectedToolId === 'creativeDirector') {
+            setCreativeDirectorInputs({ 
+              generalConceptTitle: '', shortDescription: '', purpose: '', genre: '', 
+              numberOfClips: 1, 
+              masterCharacters: [{ id: 1, name: '', description: '', isLoading: false }],
+              masterObjects: [{ id: 1, name: '', description: '', isLoading: false }],
+              mainLocation: '', 
+              additionalInstructions: ''
+            });
+        }
+        
+        if (selectedToolId === 'worldBuilder') {
+            // Preserve worldBuilderInputs if worldBuilderOutput exists, otherwise reset.
+            // This means if user has generated Jagatkisah, then switches away and back, their inputs are kept.
+            if (!worldBuilderOutput) {
+                setWorldBuilderInputs({ projectTitle: '', characterNames: '', locationNames: '', objectPetNames: '', overallTone: '', additionalInstructions: '' });
+            }
+        }
+    }
+    prevSelectedToolIdRef.current = selectedToolId; // Update the ref after logic runs
+
+  }, [selectedToolId, currentTool, worldBuilderOutput]); // Added worldBuilderOutput because its value affects worldBuilderInputs reset logic.
+
+  // --- START: Master Bible Handlers for Creative Director ---
+  const handleMasterBibleChange = (index, type, field, value) => {
+    setCreativeDirectorInputs(prev => {
+        const list = [...prev[type]];
+        list[index][field] = value;
+        return { ...prev, [type]: list };
+    });
+  };
+
+  const addMasterBibleEntry = (type) => {
+      setCreativeDirectorInputs(prev => {
+          const list = [...prev[type]];
+          const newId = list.length > 0 ? Math.max(...list.map(item => item.id)) + 1 : 1;
+          return { ...prev, [type]: [...list, { id: newId, name: '', description: '', isLoading: false }] };
+      });
+  };
+
+  const removeMasterBibleEntry = (id, type) => {
+      setCreativeDirectorInputs(prev => {
+          const list = prev[type].filter(item => item.id !== id);
+          if (list.length === 0) { // Ensure at least one entry remains
+              return { ...prev, [type]: [{ id: 1, name: '', description: '', isLoading: false }]};
+          }
+          return { ...prev, [type]: list };
+      });
+  };
+
+  const generateStrongDescription = async (index, type) => {
+    const list = creativeDirectorInputs[type];
+    const entryName = list[index].name;
+    if (!entryName.trim()) {
+        setError(`Nama ${type === 'masterCharacters' ? 'karakter' : 'objek'} harus diisi terlebih dahulu.`);
+        setTimeout(() => setError(''), 3000);
+        return;
+    }
+
+    setCreativeDirectorInputs(prev => {
+        const newList = [...prev[type]];
+        newList[index].isLoading = true;
+        return { ...prev, [type]: newList };
+    });
+
+    let llmPrompt;
+    if (type === 'masterCharacters') {
+        llmPrompt = `Bertindak sebagai seorang concept artist dan penulis karakter profesional. Buat deskripsi "resep visual" yang sangat detail untuk karakter bernama "${entryName}". Tujuannya adalah untuk menciptakan visual yang konsisten di setiap klip video AI. Sertakan elemen-elemen berikut dalam satu paragraf yang padat:
+- **Penampilan Fisik Utama:** (Postur, bentuk tubuh, warna kulit, dll.)
+- **Detail Wajah Spesifik:** (Bentuk mata, hidung, rahang, fitur wajah unik lainnya.)
+- **Gaya Rambut & Warna:** (Potongan, tekstur, warna rambut.)
+- **Pakaian Khas (Signature Outfit):** (Gaya, jenis pakaian, warna dominan yang selalu dikenakan.)
+- **Jangkar Konsistensi Visual (PENTING):** (Satu atau dua ciri khas yang sangat spesifik dan mudah diidentifikasi yang *selalu* ada, misalnya: "sebuah bekas luka kecil di bawah mata kiri," "selalu memakai cincin batu giok di jari telunjuk kanan," "tato naga kecil di leher.")
+`;
+    } else { // masterObjects
+        llmPrompt = `Bertindak sebagai seorang prop designer dan penulis profesional. Buat deskripsi "resep visual" yang sangat detail untuk objek/peliharaan bernama "${entryName}". Tujuannya adalah untuk menciptakan visual yang konsisten di setiap klip video AI. Sertakan elemen-elemen berikut dalam satu paragraf yang padat:
+- **Bentuk Presisi:** (Deskripsi bentuk geometris atau organik objek.)
+- **Material & Tekstur:** (Terbuat dari apa, misal: kayu ebony, logam perak, kristal. Bagaimana permukaannya, misal: halus, kasar, berkarat, mengkilap.)
+- **Warna & Detail Visual:** (Warna dominan dan sekunder, apakah ada pola atau ukiran.)
+- **Tanda Unik:** (Goresan, retakan, simbol, atau ciri khas lain yang membedakannya.)
+- **Jangkar Konsistensi Visual (PENTING):** (Satu atau dua ciri khas yang sangat spesifik dan mudah diidentifikasi yang *selalu* ada, misalnya: "memancarkan cahaya biru redup dari intinya," "selalu terlihat sedikit basah dengan embun," "ada ukiran kuno yang nyaris tidak terlihat di gagangnya.")
+`;
+    }
+
+    let chatHistory = [{ role: "user", parts: [{ text: llmPrompt }] }];
+    const payload = { contents: chatHistory };
+    const apiKey = ""; 
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const description = result.candidates[0].content.parts[0].text.trim();
+            handleMasterBibleChange(index, type, 'description', description);
+        } else {
+            throw new Error("Respons AI tidak valid.");
+        }
+    } catch (err) {
+        console.error("Error generating description:", err);
+        setError(`Gagal menghasilkan deskripsi untuk ${entryName}.`);
+        setTimeout(() => setError(''), 3000);
+    } finally {
+        setCreativeDirectorInputs(prev => {
+            const newList = [...prev[type]];
+            newList[index].isLoading = false;
+            return { ...prev, [type]: newList };
+        });
+    }
+  };
+
+
+  // --- END: Master Bible Handlers ---
+
+
+  const handleCreativeDirectorInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    let processedValue = value;
+    if (name === 'numberOfClips') {
+      processedValue = value === '' ? 1 : parseInt(value, 10); // Default to 1 if empty, or parse
+      if (isNaN(processedValue) || processedValue < 1) {
+        processedValue = 1; // Fallback to 1 if parsing fails or less than 1
+      }
+    }
+    setCreativeDirectorInputs(prev => ({ ...prev, [name]: processedValue }));
+  }, []); 
+
+  const handleWorldBuilderInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setWorldBuilderInputs(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+
+  const summarizeDialogIfNeeded = useCallback(async (dialogArray) => {
+    if (!dialogArray || dialogArray.length === 0) return dialogArray;
+    const totalLines = dialogArray.length;
+    const totalChars = dialogArray.reduce((acc, d) => acc + (d.line?.length || 0) , 0);
+    const needsSummarization = totalLines > 2 || (totalLines > 0 && totalChars > 120);
+    if (!needsSummarization) return dialogArray;
+
+    const originalDialogText = dialogArray.map(d => `${d.character}: "${d.line}"`).join('\n');
+    const summarizationPrompt = `Anda adalah seorang ahli peringkas dialog dan penulis skrip video yang sangat efisien. Tugas Anda adalah membaca dan memahami dialog panjang berikut ini, serta mengubahnya menjadi versi yang jauh lebih ringkas, cocok untuk video berdurasi sangat singkat (misalnya 8-10 detik). Penting: Identifikasi inti pesan setiap karakter. Padatkan setiap baris dialog menjadi maksimal 5-7 kata. Pastikan dialog ringkas tetap koheren dan logis. Pertimbangkan peran karakter. Jumlah dialog ringkas harus sesuai jumlah pembicara asli. DIALOG ASLI: ${originalDialogText} Format Output: [NAMA KARAKTER 1]: "[Dialog Ringkas 1]" (lanjutkan untuk semua karakter)`;
+
+    let chatHistory = [{ role: "user", parts: [{ text: summarizationPrompt }] }];
+    const payload = { contents: chatHistory }; const apiKey = "";
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+      const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!response.ok) { throw new Error(`HTTP error! status: ${response.status} (dialog summarization)`); }
+      const result = await response.json();
+      if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const summarizedText = result.candidates[0].content.parts[0].text.trim();
+        const summarizedDialogArray = []; const lines = summarizedText.split('\n'); const lineRegex = /(.+?):\s*"(.*?)"/;
+        for (const line of lines) { const match = line.match(lineRegex); if (match?.[1] && match?.[2]) { summarizedDialogArray.push({ character: match[1].trim(), line: match[2].trim() }); } }
+        return summarizedDialogArray.length > 0 ? summarizedDialogArray : dialogArray;
+      } return dialogArray;
+    } catch (error) { console.error('Error during dialog summarization:', error); return dialogArray; }
+  }, []);
+
+  const updateBlastModeConceptState = useCallback((index, updates) => {
+    setBlastModeConcepts(prevConcepts =>
+      prevConcepts.map((concept, i) =>
+        i === index ? { ...concept, ...updates } : concept
+      )
+    );
+  }, []);
+
+  const updateSingleConceptState = useCallback((updates) => {
+    setGeneratedConceptOutput(prev => prev ? { ...prev, ...updates } : { ...initialConceptState, ...updates });
+  }, []);
+
+  const updateCreativeDirectorClipState = useCallback((index, updates) => {
+    setCreativeDirectorClips(prevClips =>
+        prevClips.map((clip, i) =>
+            i === index ? { ...clip, ...updates } : clip
+        )
+    );
+  }, []);
+
+  const generateConceptSpecificPromptID = useCallback(async (conceptData, updateCallback, setLoadingKey, setErrorKey, forCreativeDirectorClip = false) => {
+      updateCallback({ [setLoadingKey]: true, [setErrorKey]: '' });
+
+      const dialogText = forCreativeDirectorClip
+          ? conceptData.dialogueOrNarrative || 'N/A'
+          : (conceptData.dialog || []).map(d => `${d.character}: "${d.line}"`).join('; ') || 'N/A';
+      
+      const characterList = creativeDirectorInputs.masterCharacters.filter(c => c.name.trim()).map(c => `${c.name}: ${c.description}`).join('\n');
+      const objectList = creativeDirectorInputs.masterObjects.filter(o => o.name.trim()).map(o => `${o.name}: ${o.description}`).join('\n');
+      
+      const narrativeDataSource = forCreativeDirectorClip
+          ? `
+- Ringkasan Adegan: ${conceptData.sceneSummary || 'N/A'}
+- Detail Visual: ${conceptData.visualDetails || 'N/A'}
+- Instruksi Teknis (Kamera, Suara, dll): ${conceptData.technicalInstructions || 'N/A'}
+- Dialog/Narasi: ${dialogText}
+- Tema Emosional: ${conceptData.emotionalTheme || 'N/A'}
+- Konteks Cerita Umum: ${creativeDirectorInputs.shortDescription || 'N/A'}
+- Lokasi Utama (Umum): ${creativeDirectorInputs.mainLocation || 'N/A'}
+- Master Bible Karakter: \n${characterList || 'N/A'}
+- Master Bible Objek: \n${objectList || 'N/A'}
+`
+          : `
+- Judul: ${conceptData.judul || 'N/A'}
+- Deskripsi Cerita: ${conceptData.deskripsi || 'N/A'}
+- Lokasi: ${conceptData.lokasi || 'N/A'}
+- Objek Penting: ${(conceptData.objek || []).join(', ') || 'N/A'}
+- Dialog: ${dialogText}
+- Tujuan Video: ${conceptData.tujuan || 'N/A'}
+`;
+
+      const promptLLM = `Anda adalah AI format converter dan penulis skrip ahli yang sangat teliti. Tugas Anda adalah mengubah deskripsi klip video naratif menjadi prompt yang ringkas, terstruktur, dan sinematik, persis seperti format target.
+
+**DATA NARATIF (SUMBER):**
+${narrativeDataSource}
+
+**FORMAT PROMPT TARGET (WAJIB DIIKUTI):**
+Konversikan data naratif di atas ke dalam format berikut. Gunakan label persis di bawah ini dan isi setiap poin dengan deskripsi singkat dan sinematik yang diekstrak dari data sumber. Jangan tambahkan judul, durasi, atau penjelasan genre.
+
+Adegan Utama: [Deskripsikan karakter utama dari Master Bible yang relevan dengan klip, penampilan, pakaian khas, dan setting lokasi secara padat]
+Gerakan Kamera Keseluruhan: [Sebutkan gerakan kamera utama dari instruksi teknis, misal: Two-shot stabil, handheld]
+Pencahayaan: [Sebutkan gaya pencahayaan dari detail visual, misal: Pencahayaan alami sore hari, Golden hour]
+Gaya Video: [Sebutkan gaya visual, misal: Sinematik, hyper-realistic, 8K]
+Atmosfer Video: [Deskripsikan mood dari detail visual & emosional, misal: Hangat dan intim, Damai]
+Aksi Utama: [Deskripsikan aksi utama yang terjadi dalam klip]
+Ekspresi Utama: [Deskripsikan ekspresi kunci karakter yang terlibat]
+Kalimat yang Diucapkan: [SANGAT PENTING: 1. Identifikasi dengan JELAS nama karakter yang berbicara dari Master Bible berdasarkan konteks dialog. 2. Periksa deskripsi karakter tersebut di Master Bible untuk petunjuk bahasa/asal (contoh: "asal Surabaya" -> "bahasa Jawa logat Surabaya"). 3. Format output WAJIB: NAMA_KARAKTER: "( audio bahasa [bahasa/logat jika ada] ) [dialognya]". 4. Jika tidak ada petunjuk bahasa, gunakan format: NAMA_KARAKTER: "( audio bahasa Indonesia ) [dialognya]". 5. PASTIKAN NAMA KARAKTER TIDAK TERTUKAR. Jika dialog di sumber adalah "N/A", tulis "Tidak ada".]
+Detail Tambahan: [Gabungkan detail objek penting dari Master Bible yang relevan dan detail karakter tambahan yang spesifik untuk klip ini. Contoh: Object details: Laptop di meja, Pedang Legendaris. Character details: Kacamata bulat tebal]
+Negative Prompt: ${NEGATIVE_KEYWORDS_ID}
+Fokus ekspresi wajah saat close-up:
+Pastikan kualitas gambar tajam dan detail.
+`;
+      
+      let chatHistory = [{ role: "user", parts: [{ text: promptLLM }] }];
+      const payload = { contents: chatHistory }; const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) { 
+          const errorBody = await response.text();
+          let detailedError = `HTTP error! status: ${response.status} (specific prompt ID)`;
+          if (response.status === 401 || response.status === 403) { detailedError += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; }
+          throw new Error(detailedError); 
+        }
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+          updateCallback({ specificPromptID: result.candidates[0].content.parts[0].text.trim(), [setLoadingKey]: false });
+        } else { updateCallback({ [setErrorKey]: 'Gagal menghasilkan Prompt Spesifik (ID).', [setLoadingKey]: false }); }
+      } catch (error) { 
+          updateCallback({ [setErrorKey]: `Error: ${error.message}`, [setLoadingKey]: false }); 
+      }
+  }, [worldBuilderOutput, includeJagatkisahInCD, creativeDirectorInputs, selectedToolId, currentTool, topic, selectedMode]);
+
+  const generateConceptSpecificPromptEN = useCallback(async (conceptData, specificPromptIDToTranslate, updateCallback, setLoadingKey, setErrorKey, forCreativeDirectorClip = false) => {
+    updateCallback({ [setLoadingKey]: true, [setErrorKey]: '' });
+    if (!specificPromptIDToTranslate) { 
+        updateCallback({ [setErrorKey]: 'Prompt Spesifik (ID) harus dibuat terlebih dahulu.', [setLoadingKey]: false }); 
+        return; 
+    }
+    
+    const footerLines = [
+        "Fokus ekspresi wajah saat close-up:",
+        "Pastikan kualitas gambar tajam dan detail."
+    ];
+    let mainContentID = specificPromptIDToTranslate;
+    let footerToPreserve = "";
+
+    for (const line of footerLines) {
+        if (mainContentID.includes(line)) {
+            const splitPoint = mainContentID.indexOf(line);
+            footerToPreserve = mainContentID.substring(splitPoint);
+            mainContentID = mainContentID.substring(0, splitPoint).trim();
+            break; 
+        }
+    }
+    
+    const promptLLM = `Translate the following structured video prompt from Indonesian to English. Preserve the structure, labels (like "Adegan Utama:"), and technical terms. Only translate the descriptive text. The "( audio ... )" part in "Kalimat yang Diucapkan" should be kept as is.
+    
+Indonesian Prompt:
+"${mainContentID}"
+
+English Translation:`;
+    
+    let chatHistory = [{ role: "user", parts: [{ text: promptLLM }] }];
+    const payload = { contents: chatHistory }; const apiKey = "";
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) {
+          const errorBody = await response.text();
+          let detailedError = `HTTP error! status: ${response.status} (specific prompt EN)`;
+          if (response.status === 401 || response.status === 403) { detailedError += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; }
+          throw new Error(detailedError);
+        }
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            let translatedMainContent = result.candidates[0].content.parts[0].text.trim();
+            
+            translatedMainContent = translatedMainContent.replace(`Negative Prompt: ${NEGATIVE_KEYWORDS_ID}`, `Negative Prompt: ${NEGATIVE_KEYWORDS_EN}`);
+
+            const finalENPrompt = `${translatedMainContent}\n${footerToPreserve}`;
+            updateCallback({ specificPromptEN: finalENPrompt, [setLoadingKey]: false });
+        } else { updateCallback({ [setErrorKey]: 'Gagal menerjemahkan bagian utama Prompt Spesifik (EN).', [setLoadingKey]: false }); }
+    } catch (error) { 
+        updateCallback({ [setErrorKey]: `Error: ${error.message}`, [setLoadingKey]: false }); 
+    }
+  }, []);
+  
+  const generateConceptSimplePromptID = useCallback(async (conceptData, updateCallback, setLoadingKey, setErrorKey, forCreativeDirectorClip = false) => {
+    updateCallback({ [setLoadingKey]: true, [setErrorKey]: '' });
+    let dialogLines = 'N/A';
+    if (forCreativeDirectorClip) {
+        dialogLines = conceptData.dialogueOrNarrative || 'N/A';
+    } else {
+        let currentDialog = conceptData.dialog || [];
+        if (currentDialog.length > 0) currentDialog = await summarizeDialogIfNeeded(currentDialog);
+        dialogLines = currentDialog.map(d => `${d.character}: "${d.line}"`).join(', ') || 'N/A';
+    }
+
+    const objectsList = conceptData.objek?.join(', ') || (forCreativeDirectorClip ? (conceptData.visualDetails || '').match(/objek penting: (.*?)(?:\.|;|$)/i)?.[1] || 'N/A' : 'N/A');
+    let characterContext = "";
+    
+    let promptLLM;
+    if (forCreativeDirectorClip) {
+        let jagatkisahContextForSimplePrompt = "";
+        if (includeJagatkisahInCD && worldBuilderOutput && !worldBuilderOutput.rawText) {
+            jagatkisahContextForSimplePrompt = "Gunakan detail dari JAGATKISAH untuk konsistensi karakter, lokasi, dan item. ";
+        }
+
+        const characterBible = creativeDirectorInputs.masterCharacters.filter(c=>c.name).map(c=>`${c.name}: ${c.description}`).join('; ');
+        const objectBible = creativeDirectorInputs.masterObjects.filter(o=>o.name).map(o=>`${o.name}: ${o.description}`).join('; ');
+
+        promptLLM = `Act as a Scriptwriter. For THIS SPECIFIC 8-SECOND VIDEO CLIP, generate a single, highly detailed, cinematic prompt sentence in Indonesian for Veo 3.
+        ${jagatkisahContextForSimplePrompt}Integrate: Subject/Character (implied from clip context and Master Bible), Action, Expression, Place/Setting, Time, Camera Movement, Lighting, Video Style ("8-second hyper-realistic 8K cinematic video, genre: ${creativeDirectorInputs.genre || 'general'}"), Video Atmosphere, Sound/Music, Spoken Sentences (exact dialogue: '${dialogLines}'), Additional Details.
+        Do NOT include negative prompts here.
+        Clip Data: Klip #${conceptData.clipNumber}, Ringkasan: "${conceptData.sceneSummary}", Visual: "${conceptData.visualDetails}", Dialog/Narasi: "${dialogLines}", Teknis: "${conceptData.technicalInstructions}", Tema: "${conceptData.emotionalTheme}".
+        Konsep Umum (Judul): "${creativeDirectorInputs.generalConceptTitle}". Deskripsi Singkat Umum: "${creativeDirectorInputs.shortDescription}".
+        Master Bible Karakter: ${characterBible || 'N/A'}. Master Bible Objek: ${objectBible || 'N/A'}.
+        Example Output Structure: "Sebuah video 8-second hyper-realistic 8K cinematic video (genre: ${creativeDirectorInputs.genre || 'general'}) menampilkan [Deskripsi Adegan Klip berdasarkan data di atas, gabungkan semua elemen secara naratif dan visual padat, gunakan info dari Master Bible dan JAGATKISAH JIKA ADA] dengan dialog: '${dialogLines}', detail tambahan: [keyword deskriptif dari data klip]."`;
+    } else {
+        promptLLM = `Act as a Scriptwriter. Based on the video concept below, generate a single, highly detailed, cinematic prompt sentence in Indonesian for Veo 3.
+        Integrate: Subject/Character, Action, Expression, Place/Setting, Time, Camera Movement, Lighting, Video Style ("8-second hyper-realistic 8K cinematic video"), Video Atmosphere, Sound/Music, Spoken Sentences (exact dialogue: '${dialogLines}'), Additional Details.
+        Do NOT include negative prompts here.
+        Video Concept: Judul: "${conceptData.judul}", Deskripsi: "${conceptData.deskripsi}", Lokasi: "${conceptData.lokasi || 'N/A'}", Objek: ${objectsList}, Dialog: ${dialogLines}, Tujuan: "${conceptData.tujuan || 'N/A'}". ${characterContext}
+        Example Output Structure: "Sebuah video 8-second hyper-realistic 8K cinematic video menampilkan [Deskripsi Subjek/Karakter] yang sedang [Aksi] dengan ekspresi [Ekspresi] berlokasi di [Tempat/Setting] pada [Waktu] dengan gerakan kamera [Gerakan Kamera] pencahayaan [Pencahayaan] menciptakan suasana [Suasana Video] diiringi suara atau musik [Suara/Musik] dengan dialog: '${dialogLines}', detail tambahan: [Detail Tambahan]."`;
+    }
+
+    let chatHistory = [{ role: "user", parts: [{ text: promptLLM }] }];
+    const payload = { contents: chatHistory }; const apiKey = "";
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+      const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!response.ok) { 
+        const errorBody = await response.text();
+        let detailedError = `HTTP error! status: ${response.status} (simple prompt ID core)`;
+        if (response.status === 401 || response.status === 403) { detailedError += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; }
+        throw new Error(detailedError);
+      }
+      const result = await response.json();
+      if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+        let coreSentence = result.candidates[0].content.parts[0].text.trim();
+        if (coreSentence.endsWith('.')) coreSentence = coreSentence.slice(0, -1);
+        const finalSimplePromptID = `${coreSentence}.\n\n${NEGATIVE_INSTRUCTIONS_ID_MULTILINE}\n\nNegative prompts: ${NEGATIVE_KEYWORDS_ID}`;
+        updateCallback({ simplePromptID: finalSimplePromptID, [setLoadingKey]: false });
+      } else { updateCallback({ [setErrorKey]: 'Gagal menghasilkan inti Prompt Sederhana (ID).', [setLoadingKey]: false }); }
+    } catch (error) { 
+        updateCallback({ [setErrorKey]: `Error: ${error.message}`, [setLoadingKey]: false }); 
+    }
+  }, [includeJagatkisahInCD, worldBuilderOutput, creativeDirectorInputs, summarizeDialogIfNeeded]);
+
+  const generateConceptSimplePromptEN = useCallback(async (conceptData, simplePromptIDToTranslate, updateCallback, setLoadingKey, setErrorKey, forCreativeDirectorClip = false) => {
+    updateCallback({ [setLoadingKey]: true, [setErrorKey]: '' });
+     if (!simplePromptIDToTranslate) { 
+        updateCallback({ [setErrorKey]: 'Prompt Sederhana (ID) harus dibuat terlebih dahulu.', [setLoadingKey]: false }); return; 
+    }
+
+    const instructionBoundaryID = `\n\n${NEGATIVE_INSTRUCTIONS_ID_MULTILINE}`;
+    let coreSentenceID = simplePromptIDToTranslate;
+    if (simplePromptIDToTranslate.includes(instructionBoundaryID)) { coreSentenceID = simplePromptIDToTranslate.split(instructionBoundaryID)[0].trim(); } 
+    else { const keywordLineBoundaryID = `\n\nNegative prompts: ${NEGATIVE_KEYWORDS_ID}`; if(simplePromptIDToTranslate.includes(keywordLineBoundaryID)){ coreSentenceID = simplePromptIDToTranslate.split(keywordLineBoundaryID)[0].trim(); } }
+    if (coreSentenceID.endsWith('.')) coreSentenceID = coreSentenceID.slice(0, -1);
+    
+    const spokenSentenceMatch = coreSentenceID.match(/dengan dialog:\s*'(.*?)'/);
+    let mainCoreSentenceID = coreSentenceID; let dialogContentToPreserve = null;
+    if (spokenSentenceMatch && spokenSentenceMatch[1] !== 'N/A') { dialogContentToPreserve = spokenSentenceMatch[1]; mainCoreSentenceID = mainCoreSentenceID.replace(spokenSentenceMatch[0], '__DIALOG_PLACEHOLDER__').trim(); } 
+    else if (spokenSentenceMatch && spokenSentenceMatch[1] === 'N/A') { mainCoreSentenceID = mainCoreSentenceID.replace(spokenSentenceMatch[0], '').trim(); }
+
+    const promptLLM = `Translate the following Indonesian sentence (the main descriptive part of a video prompt) into an English sentence. Maintain natural, cinematic tone. Do NOT translate the placeholder "__DIALOG_PLACEHOLDER__" if present.\n\nIndonesian sentence: "${mainCoreSentenceID}"`;
+    
+    let chatHistory = [{ role: "user", parts: [{ text: promptLLM }] }];
+    const payload = { contents: chatHistory }; const apiKey = "";
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) {
+          const errorBody = await response.text();
+          let detailedError = `HTTP error! status: ${response.status} (simple prompt EN core)`;
+          if (response.status === 401 || response.status === 403) { detailedError += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; }
+          throw new Error(detailedError);
+        }
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            let translatedCoreSentenceEN = result.candidates[0].content.parts[0].text.trim();
+            if (dialogContentToPreserve) { translatedCoreSentenceEN = translatedCoreSentenceEN.replace('__DIALOG_PLACEHOLDER__', `with dialogue: '${dialogContentToPreserve}'`); }
+            if (translatedCoreSentenceEN.endsWith('.')) translatedCoreSentenceEN = translatedCoreSentenceEN.slice(0, -1);
+            const finalSimplePromptEN = `${translatedCoreSentenceEN}.\n\n${NEGATIVE_INSTRUCTIONS_EN_MULTILINE}\n\nNegative prompts: ${NEGATIVE_KEYWORDS_EN}`;
+            updateCallback({ simplePromptEN: finalSimplePromptEN, [setLoadingKey]: false });
+        } else { updateCallback({ [setErrorKey]: 'Gagal menerjemahkan inti Prompt Sederhana (EN).', [setLoadingKey]: false }); }
+    } catch (error) { 
+        updateCallback({ [setErrorKey]: `Error: ${error.message}`, [setLoadingKey]: false }); 
+    }
+  }, []);
+
+  // --- MAIN GENERATE FUNCTION & CREATIVE DIRECTOR SESSION ---
+  const handleGenerateClips = useCallback(async (isInitial = false) => {
+    setError('');
+    if (isInitial) {
+        if (!creativeDirectorInputs.generalConceptTitle.trim()) { setError('Judul Konsep Umum tidak boleh kosong untuk Creative Director.'); return; }
+        if (creativeDirectorInputs.numberOfClips < 1) { setError('Jumlah klip harus minimal 1.'); return; }
+        setCreativeDirectorClips([]); // Reset only on the very first click
+    }
+    
+    setIsLoading(true);
+
+    const clipsAlreadyGenerated = creativeDirectorClips.length;
+    const clipsToRequest = Math.min(5, creativeDirectorInputs.numberOfClips - clipsAlreadyGenerated);
+    if (clipsToRequest <= 0) {
+        setIsLoading(false);
+        return;
+    }
+
+    let jagatkisahBible = "";
+    if (includeJagatkisahInCD && worldBuilderOutput && !worldBuilderOutput.rawText && 
+        (worldBuilderOutput.detailedCharacters?.length > 0 || 
+         worldBuilderOutput.detailedLocations?.length > 0 || 
+         worldBuilderOutput.detailedObjectsPets?.length > 0)) {
+        jagatkisahBible += "KONTEKS DUNIA CERITA (dari JAGATKISAH):\n====================================\n";
+        // ... (Jagatkisah Bible construction logic remains the same)
+    }
+
+    const masterCharacterBible = creativeDirectorInputs.masterCharacters
+        .filter(c => c.name.trim() !== '')
+        .map(c => `- ${c.name}: ${c.description}`)
+        .join('\n');
+
+    const masterObjectBible = creativeDirectorInputs.masterObjects
+        .filter(o => o.name.trim() !== '')
+        .map(o => `- ${o.name}: ${o.description}`)
+        .join('\n');
+
+    let previousClipsContext = "";
+    if (!isInitial && creativeDirectorClips.length > 0) {
+        previousClipsContext = "\nKONTEKS KLIP SEBELUMNYA (untuk menjaga kesinambungan cerita):\n====================================\n";
+        creativeDirectorClips.forEach(clip => {
+            previousClipsContext += `Klip #${clip.clipNumber}: ${clip.sceneSummary}. (Tema: ${clip.emotionalTheme})\n`;
+        });
+        previousClipsContext += `====================================\nLanjutkan cerita dari titik ini.\n`;
+    }
+
+    const userPromptForCreativeDirector = `${jagatkisahBible}${previousClipsContext}PROMPT: Bertindaklah sebagai seorang profesional multidisipliner: Scriptwriter, Copywriter, Video Producer sekaligus Director. 
+    Tugas Anda adalah menghasilkan naskah video sinematik berdasarkan permintaan pengguna.
+    
+    MASTER BIBLE (SUMBER KEBENARAN UTAMA):
+    --- KARAKTER UTAMA ---
+    ${masterCharacterBible || 'Tidak ada karakter utama yang didefinisikan dalam bible.'}
+    --- OBJEK/PELIHARAAN IKONIK ---
+    ${masterObjectBible || 'Tidak ada objek ikonik yang didefinisikan dalam bible.'}
+    --- LOKASI UTAMA ---
+    ${creativeDirectorInputs.mainLocation || 'Tidak ada deskripsi lokasi spesifik.'}
+    -----------------------------
+
+    KONSEP UMUM VIDEO:
+    - Judul: "${creativeDirectorInputs.generalConceptTitle}"
+    - Deskripsi Singkat: "${creativeDirectorInputs.shortDescription || 'N/A'}"
+    - Tujuan Video: "${creativeDirectorInputs.purpose || 'N/A'}"
+    - Genre Video: "${creativeDirectorInputs.genre || 'Umum'}"
+    - Instruksi Tambahan Umum: "${creativeDirectorInputs.additionalInstructions || 'N/A'}"
+
+    Hasilkan ${clipsToRequest} klip video berikutnya (mulai dari klip nomor ${clipsAlreadyGenerated + 1}). Untuk setiap klip, berikan detail berikut:
+    1. clipNumber: INTEGER
+    2. sceneSummary: STRING (Ringkasan unik yang membangun cerita)
+    3. visualDetails: STRING (Visual: kamera, cahaya, detail lokasi, ekspresi wajah. HARUS konsisten dengan Master Bible)
+    4. dialogueOrNarrative: STRING (Dialog natural ~8 detik. Karakter yang bicara HARUS dari Master Bible)
+    5. technicalInstructions: STRING (Gerakan kamera, suara, musik, atmosfer audio)
+    6. emotionalTheme: STRING (Tema emosional klip ini)
+    
+    PENTING: Selalu prioritaskan dan jaga konsistensi dengan detail dari MASTER BIBLE di atas. Jika ada data dari JAGATKISAH, gunakan juga sebagai referensi tambahan.`;
+
+    const clipSchema = { type: "OBJECT", properties: { "clipNumber": { "type": "INTEGER" }, "sceneSummary": { "type": "STRING" }, "visualDetails": { "type": "STRING" }, "dialogueOrNarrative": { "type": "STRING" }, "technicalInstructions": { "type": "STRING" }, "emotionalTheme": { "type": "STRING" } }, required: ["clipNumber", "sceneSummary", "visualDetails", "dialogueOrNarrative", "technicalInstructions", "emotionalTheme"] };
+    const responseSchema = { type: "ARRAY", items: clipSchema };
+
+    let chatHistory = [{ role: "user", parts: [{ text: userPromptForCreativeDirector }] }];
+    const payload = { contents: chatHistory, generationConfig: { responseMimeType: "application/json", responseSchema: responseSchema } };
+    const apiKey = ""; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) { const errorBody = await response.text(); let dErr = `HTTP error! status: ${response.status} (Creative Director). Body: ${errorBody}`; if (response.status === 401 || response.status === 403) { dErr += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; } throw new Error(dErr); }
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const partText = result.candidates[0].content.parts[0].text;
+            try { 
+                const parsedJson = JSON.parse(partText); 
+                const clipsWithState = parsedJson.map((clip, index) => ({ 
+                    ...initialConceptState, 
+                    ...clip, 
+                    clipNumber: clipsAlreadyGenerated + index + 1, 
+                })); 
+                setCreativeDirectorClips(prev => [...prev, ...clipsWithState]); 
+            } catch (e) { 
+                setError("Gagal memproses respons AI untuk Creative Director. Format tidak sesuai. Menampilkan teks mentah."); 
+                setCreativeDirectorClips(prev => [...prev, { ...initialConceptState, rawText: partText, clipNumber: prev.length + 1 }]);
+            }
+        } else { setError('Gagal mendapatkan konten dari AI untuk Creative Director.'); }
+    } catch (error) { setError(`Error Creative Director: ${error.message}`); } 
+    finally { setIsLoading(false); }
+  }, [creativeDirectorInputs, includeJagatkisahInCD, worldBuilderOutput, creativeDirectorClips]);
+
+  const handleGenerateWorldDetails = useCallback(async () => {
+    setError('');
+    setIsLoading(true);
+    setWorldBuilderOutput(null);
+
+    let dynamicPrompt = WORLD_BUILDER_AI_PROMPT_BASE;
+    dynamicPrompt += `\n\n**Instruksi Spesifik dari Pengguna:**\n`;
+    dynamicPrompt += `- Judul Proyek/Dunia: ${worldBuilderInputs.projectTitle || 'Tidak ditentukan oleh pengguna'}\n`;
+
+    const charNames = worldBuilderInputs.characterNames.split(',').map(name => name.trim()).filter(name => name);
+    if (charNames.length > 0) {
+        dynamicPrompt += `- Detail Karakter untuk: ${charNames.join(', ')}\n`;
+    } else {
+        dynamicPrompt += `- Tidak ada nama karakter spesifik yang diberikan. Jika memungkinkan, buat 1-2 karakter generik berdasarkan tone.\n`;
+    }
+
+    const locNames = worldBuilderInputs.locationNames.split(',').map(name => name.trim()).filter(name => name);
+    if (locNames.length > 0) {
+        dynamicPrompt += `- Detail Lokasi untuk: ${locNames.join(', ')}\n`;
+    } else {
+        dynamicPrompt += `- Tidak ada nama lokasi spesifik yang diberikan. Jika memungkinkan, buat 1 lokasi generik berdasarkan tone.\n`;
+    }
+
+    const objNames = worldBuilderInputs.objectPetNames.split(',').map(name => name.trim()).filter(name => name);
+    if (objNames.length > 0) {
+        dynamicPrompt += `- Detail Objek/Hewan Peliharaan untuk: ${objNames.join(', ')}\n`;
+    } else {
+        dynamicPrompt += `- Tidak ada nama objek/hewan peliharaan spesifik yang diberikan.\n`;
+    }
+    
+    dynamicPrompt += `- Tone Keseluruhan Cerita: ${worldBuilderInputs.overallTone || 'Tidak ditentukan, gunakan imajinasi Anda.'}\n`;
+    dynamicPrompt += `- Instruksi Tambahan dari Pengguna: ${worldBuilderInputs.additionalInstructions || 'Tidak ada.'}\n`;
+
+    let chatHistory = [{ role: "user", parts: [{ text: dynamicPrompt }] }];
+    const payload = { 
+        contents: chatHistory, 
+        generationConfig: { responseMimeType: "application/json", responseSchema: worldBuilderSchema } 
+    };
+    const apiKey = ""; 
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) { 
+            const errorBody = await response.text(); 
+            let dErr = `HTTP error! status: ${response.status} (World Builder). Body: ${errorBody}`; 
+            if (response.status === 401 || response.status === 403) { dErr += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; } 
+            throw new Error(dErr); 
+        }
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const partText = result.candidates[0].content.parts[0].text;
+            try { 
+                const parsedJson = JSON.parse(partText); 
+                setWorldBuilderOutput(parsedJson); 
+            } catch (e) { 
+                setError("Gagal memproses respons AI untuk JAGATKISAH. Format tidak sesuai. Menampilkan teks mentah."); 
+                setWorldBuilderOutput({ rawText: partText }); 
+            }
+        } else { 
+            setError('Gagal mendapatkan konten dari AI untuk JAGATKISAH.'); 
+            console.error("JAGATKISAH AI response error:", result);
+        }
+    } catch (error) { 
+        setError(`Error JAGATKISAH: ${error.message}`); 
+        console.error("Error in handleGenerateWorldDetails:", error);
+    } 
+    finally { setIsLoading(false); }
+  }, [worldBuilderInputs]);
+
+
+  const handleGenerate = useCallback(async () => {
+    setError(''); 
+    if (selectedToolId === 'creativeDirector') { handleGenerateClips(true); return; }
+    if (selectedToolId === 'worldBuilder') { handleGenerateWorldDetails(); return; } 
+    if (!topic.trim() && !['uniqueFacts', 'blastMode'].includes(selectedToolId) ) { setError('Topik atau ide utama tidak boleh kosong.'); return; }
+    if (!topic.trim() && selectedToolId === 'blastMode') { setError('Topik untuk BLAST MODE tidak boleh kosong.'); return; }
+    
+    setIsLoading(true); 
+    setGeneratedConceptOutput(null); 
+    setBlastModeConcepts([]); 
+    setCreativeDirectorClips([]);
+    // worldBuilderOutput is intentionally not reset here to persist data across tool uses
+
+    const subcategoryLabel = currentTool?.subcategories.find(sc => sc.value === selectedSubcategory)?.label || selectedSubcategory;
+    const modeLabel = currentTool?.modes.find(m => m.value === selectedMode)?.label || selectedMode;
+
+    let llmPrompt = `Anda adalah AI Generator Ide Video Profesional MRC. Tugas: Hasilkan SATU konsep video awal yang detail berdasarkan input pengguna. Alat yang Dipilih: "${currentTool?.name || 'Tidak Diketahui'}" ${currentTool?.subcategories.length > 0 ? `Subkategori: "${subcategoryLabel}"` : ''} ${currentTool?.modes.length > 0 ? `Mode: "${modeLabel}"` : ''} Topik/Ide Utama Pengguna: "${topic}" Format Output yang Diharapkan (dalam Bahasa Indonesia) adalah objek JSON tunggal dengan properti: "judul": STRING, "deskripsi": STRING (2-4 kalimat), "lokasi": STRING, "objek": ARRAY of STRINGS, "dialog": ARRAY of OBJECTS ({ "character": "STRING", "line": "STRING" }), "tujuan": STRING, "topic_fakta": STRING (Khusus Fakta Unik), "product_name": STRING (Khusus Iklan). Contoh untuk ${currentTool?.name || 'alat ini'}: `;
+    let responseSchema = { type: "OBJECT", properties: { "judul": { "type": "STRING" }, "deskripsi": { "type": "STRING" }, "lokasi": { "type": "STRING" }, "objek": { "type": "ARRAY", "items": { "type": "STRING" } }, "dialog": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "character": { "type": "STRING" }, "line": { "type": "STRING" } }, "required": ["character", "line"] } }, "tujuan": { "type": "STRING" }, "topic_fakta": { "type": "STRING" }, "product_name": { "type": "STRING" } }, "required": ["judul", "deskripsi", "lokasi", "objek", "dialog", "tujuan"] };
+
+    if (selectedToolId === 'blastMode') {
+        llmPrompt = `Anda adalah AI Generator Ide Video Profesional MRC. Tugas: Untuk topik "${topic}", hasilkan 10 konsep video pendek yang berbeda (masing-masing sekitar 8 detik). Setiap konsep harus mencakup: Judul, Deskripsi singkat adegan, Lokasi, Objek kunci, Dialog yang sangat singkat, dan Tujuan video. Karakter seperti MRC, JILBABGADING, MIA dapat digunakan. Pastikan dialog sangat singkat. Format Output: JSON array, setiap elemen adalah objek dengan properti: "judul", "deskripsi", "lokasi", "objek" (array string), "dialog" (array objek {character, line}), dan "tujuan".`;
+        responseSchema = { type: "ARRAY", items: { type: "OBJECT", properties: { "judul": { "type": "STRING" }, "deskripsi": { "type": "STRING" }, "lokasi": { "type": "STRING" }, "objek": { "type": "ARRAY", "items": { "type": "STRING" } }, "dialog": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "character": { "type": "STRING" }, "line": { "type": "STRING" } }, "required": ["character", "line"] } }, "tujuan": { "type": "STRING" } }, "required": ["judul", "deskripsi", "lokasi", "objek", "dialog", "tujuan"] } };
+    } 
+    
+    let chatHistory = [{ role: "user", parts: [{ text: llmPrompt }] }];
+    const payload = { contents: chatHistory, ...(responseSchema && { generationConfig: { responseMimeType: "application/json", responseSchema: responseSchema } }) };
+    const apiKey = ""; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) { const errorBody = await response.text(); let dErr = `HTTP error! status: ${response.status} (automatic tool generate)`; if (response.status === 401 || response.status === 403) { dErr += " (Unauthorized/Forbidden. Periksa API key atau konfigurasi lingkungan.)"; } throw new Error(dErr); }
+        const result = await response.json();
+        if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const partText = result.candidates[0].content.parts[0].text;
+            if (responseSchema) {
+                 try { const parsedJson = JSON.parse(partText); if (selectedToolId === 'blastMode') { setBlastModeConcepts(parsedJson.map(concept => ({ ...initialConceptState, ...concept }))); } else { setGeneratedConceptOutput({ ...initialConceptState, ...parsedJson }); } } 
+                 catch (e) { setError("Gagal memproses respons AI. Format tidak sesuai. Menampilkan teks mentah."); if (selectedToolId === 'blastMode') setBlastModeConcepts([{ ...initialConceptState, rawText: partText }]); else setGeneratedConceptOutput({ ...initialConceptState, rawText: partText }); }
+            } else { if (selectedToolId === 'blastMode') setBlastModeConcepts([{ ...initialConceptState, rawText: partText }]); else setGeneratedConceptOutput({ ...initialConceptState, rawText: partText }); }
+        } else { setError('Gagal mendapatkan konten dari AI.'); }
+    } catch (error) { setError(`Error: ${error.message}.`); } 
+    finally { setIsLoading(false); }
+  }, [selectedToolId, topic, currentTool, selectedSubcategory, selectedMode, handleGenerateClips, handleGenerateWorldDetails]);
+  
+  const copyOutputToClipboard = useCallback((output, isBlastModeArray = false, isCreativeDirectorArray = false) => {
+    if (!output && (!isBlastModeArray || blastModeConcepts.length === 0) && (!isCreativeDirectorArray || creativeDirectorClips.length === 0) && (selectedToolId !== 'worldBuilder' || !worldBuilderOutput)) return;
+    let textToCopy = "";
+
+    if (selectedToolId === 'worldBuilder' && worldBuilderOutput) {
+        if (worldBuilderOutput.rawText) {
+            textToCopy = worldBuilderOutput.rawText;
+        } else {
+            textToCopy = `JAGATKISAH: ${worldBuilderInputs.projectTitle || 'Dunia Tanpa Judul'}\n`;
+            textToCopy += `TONE: ${worldBuilderInputs.overallTone || 'Tidak Ada'}\n`;
+            textToCopy += `INSTRUKSI TAMBAHAN: ${worldBuilderInputs.additionalInstructions || 'Tidak Ada'}\n\n`;
+
+            if (worldBuilderOutput.detailedCharacters && worldBuilderOutput.detailedCharacters.length > 0) {
+                textToCopy += "=== DETAIL KARAKTER ===\n";
+                worldBuilderOutput.detailedCharacters.forEach(char => {
+                    textToCopy += `\nNama Input: ${char.inputName}\n`;
+                    textToCopy += `  Nama Lengkap: ${char.fullName || 'N/A'}\n`;
+                    textToCopy += `  Panggilan: ${char.nickname || 'N/A'}\n`;
+                    textToCopy += `  Umur: ${char.age || 'N/A'}\n`;
+                    textToCopy += `  Jenis Kelamin: ${char.gender || 'N/A'}\n`;
+                    textToCopy += `  Penampilan Fisik: ${char.appearance || 'N/A'}\n`;
+                    textToCopy += `  Kepribadian: ${char.personality || 'N/A'}\n`;
+                    textToCopy += `  Latar Belakang: ${char.background || 'N/A'}\n`;
+                    textToCopy += `  Outfit Khas: ${char.outfit || 'N/A'}\n`;
+                    textToCopy += `  Skill/Kekuatan: ${char.skillsOrPowers || 'N/A'}\n`;
+                    textToCopy += `  Motivasi: ${char.motivation || 'N/A'}\n`;
+                    textToCopy += `  Konflik Batin: ${char.internalConflict || 'N/A'}\n---\n`;
+                });
+            }
+            if (worldBuilderOutput.detailedLocations && worldBuilderOutput.detailedLocations.length > 0) {
+                textToCopy += "\n=== DETAIL LOKASI ===\n";
+                worldBuilderOutput.detailedLocations.forEach(loc => {
+                    textToCopy += `\nNama Input: ${loc.inputName}\n`;
+                    textToCopy += `  Nama Tempat: ${loc.placeName || 'N/A'}\n`;
+                    textToCopy += `  Gaya Visual: ${loc.visualStyle || 'N/A'}\n`;
+                    textToCopy += `  Suasana: ${loc.atmosphere || 'N/A'}\n`;
+                    textToCopy += `  Warna Dominan: ${loc.dominantColors || 'N/A'}\n`;
+                    textToCopy += `  Waktu/Cuaca Khas: ${loc.typicalTimeWeather || 'N/A'}\n`;
+                    textToCopy += `  Kehidupan Sosial/Aktivitas: ${loc.socialLifeOrActivity || 'N/A'}\n---\n`;
+                });
+            }
+            if (worldBuilderOutput.detailedObjectsPets && worldBuilderOutput.detailedObjectsPets.length > 0) {
+                textToCopy += "\n=== DETAIL OBJEK/HEWAN PELIHARAAN ===\n";
+                worldBuilderOutput.detailedObjectsPets.forEach(item => {
+                    textToCopy += `\nNama Input: ${item.inputName}\n`;
+                    textToCopy += `  Nama Item/Hewan: ${item.itemName || 'N/A'}\n`;
+                    textToCopy += `  Jenis: ${item.itemType || 'N/A'}\n`;
+                    textToCopy += `  Deskripsi: ${item.description || 'N/A'}\n`;
+                    textToCopy += `  Signifikansi: ${item.significance || 'N/A'}\n---\n`;
+                });
+            }
+        }
+    } else if (isCreativeDirectorArray && Array.isArray(output)) {
+        textToCopy = `Konsep Umum:\nJudul: ${creativeDirectorInputs.generalConceptTitle}\nDeskripsi Singkat: ${creativeDirectorInputs.shortDescription}\nTujuan: ${creativeDirectorInputs.purpose}\nGenre: ${creativeDirectorInputs.genre || 'Tidak ditentukan'}\n\n--- MASTER BIBLE ---\nKarakter:\n${creativeDirectorInputs.masterCharacters.filter(c=>c.name).map(c=>`- ${c.name}: ${c.description}`).join('\n')}\nObjek/Peliharaan:\n${creativeDirectorInputs.masterObjects.filter(o=>o.name).map(o=>`- ${o.name}: ${o.description}`).join('\n')}\nLokasi Utama: ${creativeDirectorInputs.mainLocation}\n-------------------\n\n`;
+        textToCopy += output.map((clip, index) => 
+            `Klip #${clip.clipNumber || index + 1}:\nRingkasan: ${clip.sceneSummary}\nVisual: ${clip.visualDetails}\nDialog/Narasi: ${clip.dialogueOrNarrative}\nTeknis: ${clip.technicalInstructions}\nTema: ${clip.emotionalTheme}` +
+            (clip.specificPromptID ? `\n\nPrompt Spesifik (ID) Klip ${clip.clipNumber || index + 1}:\n${clip.specificPromptID}` : '') +
+            (clip.specificPromptEN ? `\n\nPrompt Spesifik (EN) Klip ${clip.clipNumber || index + 1}:\n${clip.specificPromptEN}` : '') +
+            (clip.simplePromptID ? `\n\nPrompt Sederhana (ID) Klip ${clip.clipNumber || index + 1}:\n${clip.simplePromptID}` : '') +
+            (clip.simplePromptEN ? `\n\nPrompt Sederhana (EN) Klip ${clip.clipNumber || index + 1}:\n${clip.simplePromptEN}` : '')
+        ).join('\n\n===============================\n\n');
+    } else if (isBlastModeArray && Array.isArray(output)) { 
+        textToCopy = output.map((item, index) => `Konsep #${index + 1}:\nJudul: ${item.judul}\nDeskripsi: ${item.deskripsi}\nLokasi: ${item.lokasi}\nObjek: ${item.objek?.join(', ')}\nDialog: ${item.dialog?.map(d=>`${d.character}: "${d.line}"`).join('; ')}\nTujuan: ${item.tujuan}` + (item.specificPromptID ? `\n\nPrompt Spesifik (ID):\n${item.specificPromptID}` : '') + (item.specificPromptEN ? `\n\nPrompt Spesifik (EN):\n${item.specificPromptEN}` : '') + (item.simplePromptID ? `\n\nPrompt Sederhana (ID):\n${item.simplePromptID}` : '') + (item.simplePromptEN ? `\n\nPrompt Sederhana (EN):\n${item.simplePromptEN}` : '') ).join('\n\n===============================\n\n');
+    } else if (output?.rawText) { textToCopy = output.rawText; } 
+    else if (output) { textToCopy = `Judul Konsep: ${output.judul}\nDeskripsi: ${output.deskripsi}\nLokasi: ${output.lokasi}\nObjek: ${output.objek?.join(', ')}\nDialog: ${output.dialog?.map(d=>`${d.character}: "${d.line}"`).join('; ')}\nTujuan: ${output.tujuan}` + (output.specificPromptID ? `\n\nPrompt Spesifik (ID):\n${output.specificPromptID}` : '') + (output.specificPromptEN ? `\n\nPrompt Spesifik (EN):\n${output.specificPromptEN}` : '') + (output.simplePromptID ? `\n\nPrompt Sederhana (ID):\n${output.simplePromptID}` : '') + (output.simplePromptEN ? `\n\nPrompt Sederhana (EN):\n${output.simplePromptEN}` : ''); }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = textToCopy; document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); } 
+    catch (err) { console.error('Failed to copy text: ', err); }
+    document.body.removeChild(textarea);
+  }, [selectedToolId, worldBuilderOutput, worldBuilderInputs, blastModeConcepts, creativeDirectorClips, generatedConceptOutput, creativeDirectorInputs]);
+
+  const copySubPromptToClipboard = useCallback((text, promptType) => {
+    if (!text) return;
+    const textarea = document.createElement('textarea');
+    textarea.value = text; document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); setSubPromptCopySuccess(promptType); setTimeout(() => setSubPromptCopySuccess(''), 2000); } 
+    catch (err) { console.error('Failed to copy sub-prompt: ', err); }
+    document.body.removeChild(textarea);
+  }, []);
+  
+  const renderSubPromptControls = (conceptData, updateCallback, index = null, forCreativeDirectorClip = false) => {
+    const concept = conceptData; 
+    if (!concept) return null;
+    const uniqueIdPrefix = forCreativeDirectorClip ? `cd-clip-${index}` : (index !== null ? `blast-${index}` : 'single');
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-indigo-700">
+            <div>
+                <button onClick={() => generateConceptSpecificPromptID(concept, updateCallback, 'isLoadingSpecificID', 'errorSpecificID', forCreativeDirectorClip)} className={globalSubPromptButtonClass} disabled={concept.isLoadingSpecificID}>
+                    {concept.isLoadingSpecificID ? <span className="animate-spin h-4 w-4 border-t-2 border-white rounded-full mr-2"></span> : <Sparkles size={16} className="mr-1.5" />}
+                    Prompt Spesifik (ID)
+                </button>
+                {concept.errorSpecificID && <p className="mt-1 text-red-400 text-xs">{concept.errorSpecificID}</p>}
+                {concept.specificPromptID && (<div className="relative mt-2">
+                    <textarea className={globalSubPromptTextareaClass} value={concept.specificPromptID} readOnly />
+                    <button onClick={() => copySubPromptToClipboard(concept.specificPromptID, `${uniqueIdPrefix}-specificID`)} className="absolute top-1.5 right-1.5 p-1 bg-indigo-600 rounded hover:bg-indigo-500" title="Salin"><Copy size={14} className="text-yellow-300"/></button>
+                    {subPromptCopySuccess === `${uniqueIdPrefix}-specificID` && <span className="absolute bottom-1.5 right-9 text-green-400 text-xs animate-fade-in-out">Tersalin!</span>}
+                </div>)}
+            </div>
+            <div>
+                <button onClick={() => generateConceptSpecificPromptEN(concept, concept.specificPromptID, updateCallback, 'isLoadingSpecificEN', 'errorSpecificEN', forCreativeDirectorClip)} className={`${globalSubPromptButtonClass} bg-teal-600 hover:bg-teal-700`} disabled={concept.isLoadingSpecificEN || !concept.specificPromptID}>
+                    {concept.isLoadingSpecificEN ? <span className="animate-spin h-4 w-4 border-t-2 border-white rounded-full mr-2"></span> : <Sparkles size={16} className="mr-1.5" />}
+                    Prompt Spesifik (EN)
+                </button>
+                {concept.errorSpecificEN && <p className="mt-1 text-red-400 text-xs">{concept.errorSpecificEN}</p>}
+                {concept.specificPromptEN && (<div className="relative mt-2">
+                    <textarea className={globalSubPromptTextareaClass} value={concept.specificPromptEN} readOnly />
+                    <button onClick={() => copySubPromptToClipboard(concept.specificPromptEN, `${uniqueIdPrefix}-specificEN`)} className="absolute top-1.5 right-1.5 p-1 bg-indigo-600 rounded hover:bg-indigo-500" title="Salin"><Copy size={14} className="text-yellow-300"/></button>
+                    {subPromptCopySuccess === `${uniqueIdPrefix}-specificEN` && <span className="absolute bottom-1.5 right-9 text-green-400 text-xs animate-fade-in-out">Tersalin!</span>}
+                </div>)}
+            </div>
+            <div>
+                <button onClick={() => generateConceptSimplePromptID(concept, updateCallback, 'isLoadingSimpleID', 'errorSimpleID', forCreativeDirectorClip)} className={`${globalSubPromptButtonClass} bg-sky-600 hover:bg-sky-700`} disabled={concept.isLoadingSimpleID}>
+                    {concept.isLoadingSimpleID ? <span className="animate-spin h-4 w-4 border-t-2 border-white rounded-full mr-2"></span> : <Sparkles size={16} className="mr-1.5" />}
+                    Prompt Sederhana (ID)
+                </button>
+                {concept.errorSimpleID && <p className="mt-1 text-red-400 text-xs">{concept.errorSimpleID}</p>}
+                {concept.simplePromptID && (<div className="relative mt-2">
+                    <textarea className={globalSubPromptTextareaClass} value={concept.simplePromptID} readOnly />
+                    <button onClick={() => copySubPromptToClipboard(concept.simplePromptID, `${uniqueIdPrefix}-simpleID`)} className="absolute top-1.5 right-1.5 p-1 bg-indigo-600 rounded hover:bg-indigo-500" title="Salin"><Copy size={14} className="text-yellow-300"/></button>
+                    {subPromptCopySuccess === `${uniqueIdPrefix}-simpleID` && <span className="absolute bottom-1.5 right-9 text-green-400 text-xs animate-fade-in-out">Tersalin!</span>}
+                </div>)}
+            </div>
+            <div>
+                <button onClick={() => generateConceptSimplePromptEN(concept, concept.simplePromptID, updateCallback, 'isLoadingSimpleEN', 'errorSimpleEN', forCreativeDirectorClip)} className={`${globalSubPromptButtonClass} bg-amber-600 hover:bg-amber-700`} disabled={concept.isLoadingSimpleEN || !concept.simplePromptID}>
+                    {concept.isLoadingSimpleEN ? <span className="animate-spin h-4 w-4 border-t-2 border-white rounded-full mr-2"></span> : <Sparkles size={16} className="mr-1.5" />}
+                    Prompt Sederhana (EN)
+                </button>
+                {concept.errorSimpleEN && <p className="mt-1 text-red-400 text-xs">{concept.errorSimpleEN}</p>}
+                {concept.simplePromptEN && (<div className="relative mt-2">
+                    <textarea className={globalSubPromptTextareaClass} value={concept.simplePromptEN} readOnly />
+                    <button onClick={() => copySubPromptToClipboard(concept.simplePromptEN, `${uniqueIdPrefix}-simpleEN`)} className="absolute top-1.5 right-1.5 p-1 bg-indigo-600 rounded hover:bg-indigo-500" title="Salin"><Copy size={14} className="text-yellow-300"/></button>
+                    {subPromptCopySuccess === `${uniqueIdPrefix}-simpleEN` && <span className="absolute bottom-1.5 right-9 text-green-400 text-xs animate-fade-in-out">Tersalin!</span>}
+                </div>)}
+            </div>
+        </div>
+    );
+  };
+
+  const getJagatkisahInputClass = (type = 'input') => {
+    if (!jagatkisahTheme) return globalInputClass; 
+    if (type === 'textarea') {
+        return `w-full p-3 ${jagatkisahTheme.inputBg} ${jagatkisahTheme.inputText} border ${jagatkisahTheme.inputBorder} rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200 ease-in-out min-h-[70px] placeholder-indigo-300/70`;
+    }
+    return `w-full p-3 ${jagatkisahTheme.inputBg} ${jagatkisahTheme.inputText} border ${jagatkisahTheme.inputBorder} rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200 ease-in-out placeholder-indigo-300/70`;
+  };
+  
+  const getJagatkisahLabelClass = () => {
+    if (!jagatkisahTheme) return globalLabelClass; 
+    return `block ${jagatkisahTheme.labelText} ${jagatkisahTheme.fontFamily} text-sm font-bold mb-2`;
+  };
+  
+  return (
+    <div className={`p-4 sm:p-6 md:p-8 ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.fontFamily : 'font-inter'}`}>
+      <h2 className={`text-3xl sm:text-4xl font-lora font-extrabold text-center mb-2 tracking-tight ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.titleText : 'text-yellow-300'}`}>Mode Sutradara</h2>
+      <p className={`text-center text-sm mb-10 max-w-3xl mx-auto ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.labelText : 'text-indigo-200'}`}>Pilih alat bantu AI untuk menghasilkan ide, membangun dunia cerita, atau menyusun klip video secara otomatis.</p>
+      
+      {/* Tool Selection Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+        {automaticTools.map(tool => (
+          <button 
+            key={tool.id} 
+            onClick={() => setSelectedToolId(tool.id)} 
+            className={`flex flex-col items-center justify-center p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4
+                        ${selectedToolId === tool.id ? 
+                            (tool.id === 'worldBuilder' && tool.theme ? `${tool.theme.cardBg} border-yellow-400 shadow-yellow-500/30 shadow-2xl ring-yellow-500/50` : `bg-yellow-500 border-yellow-600 text-indigo-950 shadow-xl ring-yellow-300/50`) : 
+                            (tool.id === 'worldBuilder' && tool.theme ? `${tool.theme.inputBg} border-indigo-600 hover:border-yellow-400/70 text-indigo-200` : `bg-slate-800 border-indigo-700 hover:border-yellow-400/70 text-indigo-200`)}`}
+            >
+            <tool.icon size={32} className={`mb-2 transition-colors ${selectedToolId === tool.id ? (tool.id === 'worldBuilder' && tool.theme ? tool.theme.titleText : 'text-indigo-950') : (tool.id === 'worldBuilder' && tool.theme ? tool.theme.labelText : 'text-yellow-300')}`}/>
+            <span className={`text-sm sm:text-md font-lora font-semibold text-center transition-colors ${selectedToolId === tool.id ? (tool.id === 'worldBuilder' && tool.theme ? tool.theme.titleText : 'text-indigo-950') : (tool.id === 'worldBuilder' && tool.theme ? tool.theme.labelText : 'text-indigo-100')}`}>
+                {tool.name}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Tool Specific UI Area */}
+      {currentTool && (
+        <div className={`rounded-xl p-5 sm:p-8 shadow-2xl 
+                        ${currentTool.id === 'worldBuilder' && jagatkisahTheme ? jagatkisahTheme.mainBg : 'bg-slate-900 border border-indigo-800'}`}>
+            <div className="flex items-center mb-2">
+                 {React.createElement(currentTool.icon, { size: 28, className: `${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.titleText : 'text-yellow-300'} mr-3` })}
+                <h3 className={`text-2xl sm:text-3xl font-lora font-bold ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.titleText : 'text-yellow-300'}`}>{currentTool.name}</h3>
+            </div>
+            <p className={`text-sm text-opacity-80 mb-6 ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.labelText : 'text-indigo-200'}`}>{currentTool.tagline}</p>
+
+            {selectedToolId === 'creativeDirector' ? (
+                <div className="space-y-6">
+                    {/* --- General Info Section --- */}
+                    <div className="space-y-4 p-4 border border-indigo-700 rounded-lg bg-indigo-900/30">
+                        <h4 className="text-lg font-lora font-semibold text-yellow-300">Informasi Umum</h4>
+                        <div><label htmlFor="generalConceptTitle" className={globalLabelClass}>Judul Konsep Umum / Cerita:</label><input type="text" name="generalConceptTitle" id="generalConceptTitle" value={creativeDirectorInputs.generalConceptTitle} onChange={handleCreativeDirectorInputChange} className={globalInputClass} placeholder="e.g., Petualangan di Hutan Ajaib" /></div>
+                        <div><label htmlFor="shortDescription" className={globalLabelClass}>Deskripsi Singkat Konsep (1-2 kalimat):</label><textarea name="shortDescription" id="shortDescription" value={creativeDirectorInputs.shortDescription} onChange={handleCreativeDirectorInputChange} className={`${globalTextareaClass} min-h-[70px]`} placeholder="e.g., Sebuah kisah tentang pencarian artefak kuno." /></div>
+                        <div>
+                          <label htmlFor="genre" className={globalLabelClass}>Genre Video:</label>
+                          <div className="relative">
+                              <select name="genre" id="genre" value={creativeDirectorInputs.genre} onChange={handleCreativeDirectorInputChange} className={globalSelectClass}>
+                                  {genreOptions.map(opt => <option key={opt.value} value={opt.value} className="bg-slate-800 text-gray-200">{opt.label}</option>)}
+                              </select>
+                              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-300"><ChevronDown size={18}/></div>
+                          </div>
+                        </div>
+                        <div><label htmlFor="numberOfClips" className={globalLabelClass}>Jumlah Total Klip:</label><input type="number" name="numberOfClips" id="numberOfClips" value={creativeDirectorInputs.numberOfClips} onChange={handleCreativeDirectorInputChange} className={globalInputClass} min="1" placeholder="e.g., 10" /></div>
+                    </div>
+
+                    {/* --- Master Bible Section --- */}
+                    <div className="space-y-4 p-4 border border-purple-700 rounded-lg bg-purple-900/30">
+                        <h4 className="text-lg font-lora font-semibold text-purple-300 flex items-center"><Library size={20} className="mr-2"/> Master Bible</h4>
+                        
+                        {/* Master Characters */}
+                        <div className="space-y-3">
+                            <label className={globalLabelClass}>Karakter Utama:</label>
+                            {creativeDirectorInputs.masterCharacters.map((char, index) => (
+                                <div key={char.id} className="p-3 bg-slate-800/50 rounded-md border border-slate-700 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <input type="text" value={char.name} onChange={(e) => handleMasterBibleChange(index, 'masterCharacters', 'name', e.target.value)} placeholder={`Nama Karakter #${index + 1}`} className={`${globalInputClass} flex-grow`} />
+                                        <button onClick={() => removeMasterBibleEntry(char.id, 'masterCharacters')} className="p-2 text-red-400 hover:text-red-300"><Trash2 size={18}/></button>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <textarea value={char.description} onChange={(e) => handleMasterBibleChange(index, 'masterCharacters', 'description', e.target.value)} placeholder="Deskripsi detail karakter (penampilan, sifat, pakaian, dll...)" className={`${globalTextareaClass} min-h-[90px] text-sm flex-grow`} />
+                                        <button onClick={() => generateStrongDescription(index, 'masterCharacters')} disabled={char.isLoading} className="p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50" title="Generate Deskripsi Kuat">
+                                            {char.isLoading ? <span className="animate-spin h-5 w-5 border-t-2 border-white rounded-full"></span> : <Sparkles size={20} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            <button onClick={() => addMasterBibleEntry('masterCharacters')} className="flex items-center text-sm text-green-400 hover:text-green-300"><PlusCircle size={16} className="mr-1.5"/> Tambah Karakter</button>
+                        </div>
+
+                        {/* Master Objects */}
+                        <div className="space-y-3">
+                            <label className={globalLabelClass}>Objek / Peliharaan Ikonik:</label>
+                            {creativeDirectorInputs.masterObjects.map((obj, index) => (
+                                <div key={obj.id} className="p-3 bg-slate-800/50 rounded-md border border-slate-700 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <input type="text" value={obj.name} onChange={(e) => handleMasterBibleChange(index, 'masterObjects', 'name', e.target.value)} placeholder={`Nama Objek #${index + 1}`} className={`${globalInputClass} flex-grow`} />
+                                        <button onClick={() => removeMasterBibleEntry(obj.id, 'masterObjects')} className="p-2 text-red-400 hover:text-red-300"><Trash2 size={18}/></button>
+                                    </div>
+                                     <div className="flex items-start gap-2">
+                                        <textarea value={obj.description} onChange={(e) => handleMasterBibleChange(index, 'masterObjects', 'description', e.target.value)} placeholder="Deskripsi detail objek/peliharaan (penampilan, fungsi, signifikansi, dll...)" className={`${globalTextareaClass} min-h-[90px] text-sm flex-grow`} />
+                                        <button onClick={() => generateStrongDescription(index, 'masterObjects')} disabled={obj.isLoading} className="p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50" title="Generate Deskripsi Kuat">
+                                             {obj.isLoading ? <span className="animate-spin h-5 w-5 border-t-2 border-white rounded-full"></span> : <Sparkles size={20} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            <button onClick={() => addMasterBibleEntry('masterObjects')} className="flex items-center text-sm text-green-400 hover:text-green-300"><PlusCircle size={16} className="mr-1.5"/> Tambah Objek/Peliharaan</button>
+                        </div>
+                         
+                        {/* Main Location */}
+                        <div><label htmlFor="mainLocation" className={globalLabelClass}>Lokasi Utama (Setting Umum):</label><textarea name="mainLocation" id="mainLocation" value={creativeDirectorInputs.mainLocation} onChange={handleCreativeDirectorInputChange} className={`${globalTextareaClass} min-h-[100px]`} placeholder="e.g., Sebuah kota metropolitan cyberpunk di tahun 2077, selalu malam hari dan diguyur hujan neon..." /></div>
+                        <div><label htmlFor="additionalInstructions" className={globalLabelClass}>Instruksi Tambahan (Umum):</label><textarea name="additionalInstructions" id="additionalInstructions" value={creativeDirectorInputs.additionalInstructions} onChange={handleCreativeDirectorInputChange} className={globalTextareaClass} placeholder="e.g., Fokus pada emosi persahabatan, gunakan banyak slow-motion..." /></div>
+                    </div>
+                </div>
+            ) : selectedToolId === 'worldBuilder' && jagatkisahTheme ? (
+                <div className="space-y-5">
+                    <div><label htmlFor="wb_projectTitle" className={getJagatkisahLabelClass()}>Judul Proyek/Dunia (Opsional):</label><input type="text" name="projectTitle" id="wb_projectTitle" value={worldBuilderInputs.projectTitle} onChange={handleWorldBuilderInputChange} className={getJagatkisahInputClass()} placeholder="e.g., Saga Kristal Abadi" /></div>
+                    <div><label htmlFor="wb_characterNames" className={getJagatkisahLabelClass()}>Nama Karakter (pisahkan koma):</label><textarea name="characterNames" id="wb_characterNames" value={worldBuilderInputs.characterNames} onChange={handleWorldBuilderInputChange} className={getJagatkisahInputClass('textarea')} placeholder="e.g., Arion, Lyra, Master Kael" /></div>
+                    <div><label htmlFor="wb_locationNames" className={getJagatkisahLabelClass()}>Nama Lokasi Penting (pisahkan koma):</label><textarea name="locationNames" id="wb_locationNames" value={worldBuilderInputs.locationNames} onChange={handleWorldBuilderInputChange} className={getJagatkisahInputClass('textarea')} placeholder="e.g., Kuil Langit, Hutan Bisikan" /></div>
+                    <div><label htmlFor="wb_objectPetNames" className={getJagatkisahLabelClass()}>Nama Objek/Peliharaan Ikonik (pisahkan koma):</label><textarea name="objectPetNames" id="wb_objectPetNames" value={worldBuilderInputs.objectPetNames} onChange={handleWorldBuilderInputChange} className={getJagatkisahInputClass('textarea')} placeholder="e.g., Pedang Surya, Naga Es Faelan" /></div>
+                    <div><label htmlFor="wb_overallTone" className={getJagatkisahLabelClass()}>Tone Keseluruhan Cerita:</label><input type="text" name="overallTone" id="wb_overallTone" value={worldBuilderInputs.overallTone} onChange={handleWorldBuilderInputChange} className={getJagatkisahInputClass()} placeholder="e.g., fantasi epik, horor kosmik" /></div>
+                    <div><label htmlFor="wb_additionalInstructions" className={getJagatkisahLabelClass()}>Instruksi Tambahan untuk AI:</label><textarea name="additionalInstructions" id="wb_additionalInstructions" value={worldBuilderInputs.additionalInstructions} onChange={handleWorldBuilderInputChange} className={getJagatkisahInputClass('textarea')} placeholder="e.g., Fokus sihir kuno, hindari teknologi modern." /></div>
+                </div>
+            ) : ( // Fallback for other tools
+                <>
+                    <div className="mb-5">
+                        <label htmlFor="topic" className={globalLabelClass}>
+                            {selectedToolId === 'uniqueFacts' ? 'Topik / Kata Kunci (Opsional):' : selectedToolId === 'blastMode' ? 'Topik / Tema Umum untuk 10 Ide:' : 'Topik / Ide Utama Video Anda:'}
+                        </label>
+                        <textarea id="topic" className={`${globalTextareaClass} min-h-[100px]`} placeholder={`Masukkan topik untuk "${currentTool?.name || 'alat ini'}"...`} value={topic} onChange={(e) => setTopic(e.target.value)} />
+                    </div>
+                    {selectedToolId !== 'blastMode' && currentTool?.subcategories.length > 0 && currentTool?.modes.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                            <div>
+                                <label htmlFor="subcategory" className={globalLabelClass}>Pilih Subkategori:</label>
+                                <div className="relative">
+                                    <select id="subcategory" className={globalSelectClass} value={selectedSubcategory} onChange={(e) => setSelectedSubcategory(e.target.value)} disabled={currentTool.subcategories.length === 0}>
+                                        {currentTool.subcategories.map(sc => <option key={sc.value} value={sc.value} className="bg-slate-800 text-gray-200">{sc.label}</option>)}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-300"><ChevronDown size={18}/></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor="mode" className={globalLabelClass}>Pilih Mode:</label>
+                                <div className="relative">
+                                    <select id="mode" className={globalSelectClass} value={selectedMode} onChange={(e) => setSelectedMode(e.target.value)} disabled={currentTool.modes.length === 0}>
+                                        {currentTool.modes.map(m => <option key={m.value} value={m.value} className="bg-slate-800 text-gray-200">{m.label}</option>)}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-300"><ChevronDown size={18}/></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+            <div className="flex justify-center mt-8">
+                <button 
+                    onClick={handleGenerate} 
+                    className={`${jagatkisahTheme && selectedToolId === 'worldBuilder' ? `${jagatkisahTheme.buttonBg} ${jagatkisahTheme.buttonText}` : globalButtonClass} px-10 py-3.5 text-base`}
+                    disabled={isLoading}
+                >
+                    {isLoading && creativeDirectorClips.length === 0 ? (<span className="animate-spin h-5 w-5 border-t-2 border-current rounded-full mr-2.5"></span>) : (<Sparkles size={22} className="mr-2.5" />)}
+                    {selectedToolId === 'creativeDirector' ? 'Mulai Sesi Creative Director' : 
+                     selectedToolId === 'worldBuilder' ? 'Rancang JAGATKISAH' : 
+                     (selectedToolId === 'blastMode' ? 'Ledakkan Ide!' : `Hasilkan Ide`)}
+                </button>
+            </div>
+            {error && (<div className={`mt-6 p-4 rounded-md flex items-center text-sm ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? 'bg-red-900/60 border border-red-700/70 text-red-300' : 'bg-red-500/20 border border-red-500/50 text-red-300' }`}><XCircle size={20} className="mr-2.5 flex-shrink-0" /><span className="flex-grow break-all">{error}</span></div>)}
+        </div>
+      )}
+
+      {/* Output Area - Styled Globally */}
+      {(generatedConceptOutput || blastModeConcepts.length > 0 || creativeDirectorClips.length > 0 || worldBuilderOutput) && (
+        <div className={`mt-10 rounded-xl p-5 sm:p-8 shadow-2xl ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.mainBg : 'bg-slate-900 border border-indigo-800'}`}>
+            <div className="flex justify-between items-center mb-6">
+                <h3 className={`text-2xl font-lora font-bold ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? jagatkisahTheme.titleText : 'text-yellow-300'}`}>Hasil Generasi</h3>
+                <div className="relative">
+                    <button 
+                        onClick={() => copyOutputToClipboard(
+                            selectedToolId === 'blastMode' ? blastModeConcepts : 
+                            selectedToolId === 'creativeDirector' ? creativeDirectorClips : 
+                            selectedToolId === 'worldBuilder' ? worldBuilderOutput : 
+                            generatedConceptOutput, 
+                            selectedToolId === 'blastMode',
+                            selectedToolId === 'creativeDirector'
+                        )} 
+                        className={`p-2.5 rounded-md transition-colors ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? `${jagatkisahTheme.inputBg} ${jagatkisahTheme.titleText} hover:bg-opacity-80` : 'bg-indigo-700 text-yellow-300 hover:bg-indigo-600'}`} title="Salin semua output">
+                        <Copy size={20} />
+                    </button>
+                    {copySuccess && (<span className={`absolute -top-9 right-0 text-xs px-2.5 py-1.5 rounded-md shadow-lg animate-fade-in-out ${jagatkisahTheme && selectedToolId === 'worldBuilder' ? 'bg-yellow-400 text-indigo-950' : 'bg-green-500 text-white'}`}>Tersalin!</span>)}
+                </div>
+            </div>
+            
+            {/* Raw Text Outputs - Styled Consistently */}
+            {generatedConceptOutput?.rawText && !['blastMode', 'creativeDirector', 'worldBuilder'].includes(selectedToolId) && ( <div className={globalCardClass}><h4 className={globalCardTitleClass}>Output Mentah:</h4><pre className={`${globalCardTextClass} text-xs whitespace-pre-wrap bg-slate-700/50 p-3 rounded-md`}>{generatedConceptOutput.rawText}</pre></div>)}
+            {blastModeConcepts.length > 0 && blastModeConcepts[0]?.rawText && selectedToolId === 'blastMode' && ( <div className={globalCardClass}><h4 className={globalCardTitleClass}>Output Mentah (Blast Mode):</h4><pre className={`${globalCardTextClass} text-xs whitespace-pre-wrap bg-slate-700/50 p-3 rounded-md`}>{blastModeConcepts[0].rawText}</pre></div>)}
+            {creativeDirectorClips.length > 0 && creativeDirectorClips[0]?.rawText && selectedToolId === 'creativeDirector' && ( <div className={globalCardClass}><h4 className={globalCardTitleClass}>Output Mentah (Creative Director):</h4><pre className={`${globalCardTextClass} text-xs whitespace-pre-wrap bg-slate-700/50 p-3 rounded-md`}>{creativeDirectorClips[0].rawText}</pre></div>)}
+            {worldBuilderOutput?.rawText && selectedToolId === 'worldBuilder' && ( <div className={jagatkisahTheme ? `${jagatkisahTheme.cardBg} ${jagatkisahTheme.cardBorder} border p-4 rounded-lg` : globalCardClass}><h4 className={`${jagatkisahTheme ? jagatkisahTheme.cardTitle : globalCardTitleClass} ${jagatkisahTheme ? jagatkisahTheme.fontFamily: ''}`}>Output Mentah (JAGATKISAH):</h4><pre className={`${jagatkisahTheme ? jagatkisahTheme.cardText : globalCardTextClass} text-xs whitespace-pre-wrap ${jagatkisahTheme ? `${jagatkisahTheme.inputBg}/50` : 'bg-slate-700/50'} p-3 rounded-md`}>{worldBuilderOutput.rawText}</pre></div>)}
+
+            {/* Blast Mode Output Cards */}
+            {selectedToolId === 'blastMode' && blastModeConcepts.length > 0 && !blastModeConcepts[0]?.rawText && (
+                <div className="space-y-6">
+                    {blastModeConcepts.map((concept, index) => (
+                        <div key={index} className={globalCardClass}>
+                            <h4 className={globalCardTitleClass}>Konsep #{index + 1}: {concept.judul}</h4>
+                             <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Deskripsi:</strong> {concept.deskripsi}</p>
+                            <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Lokasi:</strong> {concept.lokasi}</p>
+                            <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Objek:</strong> {concept.objek?.join(', ') || 'N/A'}</p>
+                            <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Dialog:</strong> {concept.dialog?.map(d => `${d.character}: "${d.line}"`).join('; ') || 'N/A'}</p>
+                            <p className={`${globalCardTextClass} mb-3`}><strong className="font-semibold text-indigo-200">Tujuan:</strong> {concept.tujuan}</p>
+                            {renderSubPromptControls(concept, (updates) => updateBlastModeConceptState(index, updates), index, false)}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Creative Director Output Cards */}
+            {selectedToolId === 'creativeDirector' && creativeDirectorClips.length > 0 && !creativeDirectorClips[0]?.rawText && (
+                <div className="space-y-6">
+                    <h4 className={`${globalCardTitleClass} !text-2xl !text-center`}>Rancangan Klip Video</h4>
+                    <div className="bg-purple-900/30 p-4 rounded-lg border border-purple-700 mb-4 text-sm">
+                        <p className="text-purple-200"><strong className="font-semibold text-purple-100">Judul Konsep Umum:</strong> {creativeDirectorInputs.generalConceptTitle}</p>
+                        <p className="text-purple-200"><strong className="font-semibold text-purple-100">Deskripsi Singkat:</strong> {creativeDirectorInputs.shortDescription}</p>
+                        {includeJagatkisahInCD && worldBuilderOutput && !worldBuilderOutput.rawText && (
+                            <p className="mt-2 text-xs text-purple-300 border-t border-purple-600 pt-2 flex items-center">
+                                <Link2 size={14} className="inline mr-1.5" /> Menggunakan detail dari JAGATKISAH yang aktif.
+                            </p>
+                        )}
+                    </div>
+                    {creativeDirectorClips.map((clip, index) => (
+                      <div key={index} className={`${globalCardClass} border-purple-700/70`}>
+                        <h5 className={`${globalCardTitleClass} !text-xl text-purple-300`}>Klip #{clip.clipNumber || index + 1}: {clip.sceneSummary || 'N/A'}</h5>
+                        <div className={`${globalCardTextClass} space-y-1 mb-3 text-indigo-200`}>
+                            <p><strong>Detail Visual:</strong> {clip.visualDetails || 'N/A'}</p>
+                            <p><strong>Dialog/Narasi:</strong> {clip.dialogueOrNarrative || 'N/A'}</p>
+                            <p><strong>Instruksi Teknis:</strong> {clip.technicalInstructions || 'N/A'}</p>
+                            <p><strong>Tema Emosional:</strong> {clip.emotionalTheme || 'N/A'}</p>
+                        </div>
+                        {renderSubPromptControls(clip, (updates) => updateCreativeDirectorClipState(index, updates), index, true)}
+                      </div>
+                    ))}
+                    {creativeDirectorClips.length > 0 && creativeDirectorClips.length < creativeDirectorInputs.numberOfClips && (
+                        <div className="flex justify-center mt-6">
+                            <button
+                                onClick={() => handleGenerateClips(false)}
+                                className={globalButtonClass}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <><span className="animate-spin h-5 w-5 border-t-2 border-current rounded-full mr-2.5"></span>Menghasilkan...</>
+                                ) : (
+                                    <><Sparkles size={22} className="mr-2.5" />{`Hasilkan ${creativeDirectorInputs.numberOfClips - creativeDirectorClips.length} Klip Tersisa`}</>
+                                )}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+            
+            {/* JAGATKISAH Output Cards */}
+            {selectedToolId === 'worldBuilder' && worldBuilderOutput && !worldBuilderOutput.rawText && jagatkisahTheme && (
+                <div className={`space-y-8 ${jagatkisahTheme.fontFamily}`}>
+                    <h4 className={`text-3xl font-bold text-center mb-4 ${jagatkisahTheme.titleText}`}>JAGATKISAH: {worldBuilderInputs.projectTitle || 'Dunia Tanpa Judul'}</h4>
+                     <div className={`${jagatkisahTheme.cardBg} p-5 rounded-xl ${jagatkisahTheme.cardBorder} border-2 mb-6 text-sm shadow-2xl shadow-yellow-500/10`}>
+                        <p className={jagatkisahTheme.cardText}><strong className={`${jagatkisahTheme.cardTitle} text-base`}>Tone Keseluruhan:</strong> {worldBuilderInputs.overallTone || 'Tidak Ada'}</p>
+                        <p className={jagatkisahTheme.cardText}><strong className={`${jagatkisahTheme.cardTitle} text-base`}>Instruksi Tambahan:</strong> {worldBuilderInputs.additionalInstructions || 'Tidak Ada'}</p>
+                    </div>
+
+                    {worldBuilderOutput.detailedCharacters && worldBuilderOutput.detailedCharacters.length > 0 && (
+                        <div className="p-1 jagatkisah-card-enter jagatkisah-card-enter-active">
+                            <h5 className={`text-2xl font-semibold mb-4 flex items-center ${jagatkisahTheme.titleText}`}><Users size={28} className="mr-3"/> Karakter Jagatkisah:</h5>
+                            {worldBuilderOutput.detailedCharacters.map((char, idx) => (
+                                <div key={idx} className={`mb-6 p-5 rounded-xl shadow-xl border-2 ${jagatkisahTheme.cardBg} ${jagatkisahTheme.cardBorder}`}>
+                                    <p className={`text-xl font-semibold ${jagatkisahTheme.cardTitle}`}>Nama Input: {char.inputName}</p>
+                                    <div className="mt-2 space-y-1 text-sm">
+                                      {Object.entries(char).filter(([key]) => key !== 'inputName').map(([key, value]) => value ? <p key={key} className={jagatkisahTheme.cardText}><strong className="capitalize text-indigo-200">{key.replace(/([A-Z])/g, ' $1')}:</strong> {value}</p> : null)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {worldBuilderOutput.detailedLocations && worldBuilderOutput.detailedLocations.length > 0 && (
+                        <div className="p-1 jagatkisah-card-enter jagatkisah-card-enter-active" style={{animationDelay: '100ms'}}>
+                            <h5 className={`text-2xl font-semibold mb-4 flex items-center ${jagatkisahTheme.titleText}`}><MapPin size={28} className="mr-3"/> Lokasi Jagatkisah:</h5>
+                            {worldBuilderOutput.detailedLocations.map((loc, idx) => (
+                                 <div key={idx} className={`mb-6 p-5 rounded-xl shadow-xl border-2 ${jagatkisahTheme.cardBg} ${jagatkisahTheme.cardBorder}`}>
+                                    <p className={`text-xl font-semibold ${jagatkisahTheme.cardTitle}`}>Nama Input: {loc.inputName}</p>
+                                     <div className="mt-2 space-y-1 text-sm">
+                                      {Object.entries(loc).filter(([key]) => key !== 'inputName').map(([key, value]) => value ? <p key={key} className={jagatkisahTheme.cardText}><strong className="capitalize text-indigo-200">{key.replace(/([A-Z])/g, ' $1')}:</strong> {value}</p> : null)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {worldBuilderOutput.detailedObjectsPets && worldBuilderOutput.detailedObjectsPets.length > 0 && (
+                         <div className="p-1 jagatkisah-card-enter jagatkisah-card-enter-active" style={{animationDelay: '200ms'}}>
+                            <h5 className={`text-2xl font-semibold mb-4 flex items-center ${jagatkisahTheme.titleText}`}><Package size={28} className="mr-3"/> Objek/Peliharaan Ikonik:</h5>
+                            {worldBuilderOutput.detailedObjectsPets.map((item, idx) => (
+                                 <div key={idx} className={`mb-6 p-5 rounded-xl shadow-xl border-2 ${jagatkisahTheme.cardBg} ${jagatkisahTheme.cardBorder}`}>
+                                    <p className={`text-xl font-semibold ${jagatkisahTheme.cardTitle}`}>Nama Input: {item.inputName}</p>
+                                     <div className="mt-2 space-y-1 text-sm">
+                                      {Object.entries(item).filter(([key]) => key !== 'inputName').map(([key, value]) => value ? <p key={key} className={jagatkisahTheme.cardText}><strong className="capitalize text-indigo-200">{key.replace(/([A-Z])/g, ' $1')}:</strong> {value}</p> : null)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Fallback for other tools output */}
+            {!['blastMode', 'creativeDirector', 'worldBuilder'].includes(selectedToolId) && generatedConceptOutput && !generatedConceptOutput.rawText && (
+                 <div className={globalCardClass}>
+                    <h4 className={globalCardTitleClass}>Konsep Utama: {generatedConceptOutput.judul}</h4>
+                    <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Deskripsi:</strong> {generatedConceptOutput.deskripsi}</p>
+                    <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Lokasi:</strong> {generatedConceptOutput.lokasi}</p>
+                    <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Objek:</strong> {generatedConceptOutput.objek?.join(', ') || 'N/A'}</p>
+                    <p className={`${globalCardTextClass} mb-1`}><strong className="font-semibold text-indigo-200">Dialog:</strong> {generatedConceptOutput.dialog?.map(d => `${d.character}: "${d.line}"`).join('; ') || 'N/A'}</p>
+                    <p className={`${globalCardTextClass} mb-3`}><strong className="font-semibold text-indigo-200">Tujuan:</strong> {generatedConceptOutput.tujuan}</p>
+                    {renderSubPromptControls(generatedConceptOutput, updateSingleConceptState, null, false)}
+                </div>
+            )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Main App Component - Wrapper and Mode Switcher
+const App = () => {
+  const [currentMode, setCurrentMode] = useState('sutradara'); // 'arsitek' or 'sutradara'
+
+  const modeButtonBaseClass = "px-6 py-3 rounded-t-lg font-lora text-base sm:text-lg font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-400/70";
+  const activeModeClass = "bg-slate-900 text-yellow-300 shadow-inner-lg"; // Updated active class
+  const inactiveModeClass = "bg-indigo-800/60 text-indigo-300 hover:bg-indigo-700/80 hover:text-yellow-200";
+
+  return (
+    <div className="min-h-screen bg-indigo-950 text-gray-100 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 font-inter">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .font-lora { font-family: 'Lora', serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .jagatkisah-card-enter { opacity: 0; transform: translateY(15px) scale(0.98); }
+        .jagatkisah-card-enter-active { opacity: 1; transform: translateY(0) scale(1); transition: opacity 400ms ease-out, transform 400ms ease-out; }
+        .shadow-inner-lg { box-shadow: inset 0 2px 10px 0 rgba(0,0,0,0.3); }
+      `}</style>
+      
+      <header className="w-full max-w-5xl text-center my-8 sm:my-12">
+        {/* Placeholder for a more cinematic logo if available */}
+        {/* <img src="/path-to-your-logo.svg" alt="MRC Prompt Generator Logo" className="h-12 mx-auto mb-4"/> */}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-lora font-extrabold text-yellow-300 tracking-tight">
+          MRC Prompt Generator
+        </h1>
+        <p className="text-indigo-200 text-lg sm:text-xl mt-3">Gerbang Imajinasi Sinematik Anda</p>
+      </header>
+
+      <div className="w-full max-w-5xl mb-0">
+        <div className="flex justify-center border-b-2 border-indigo-700">
+          <button 
+            className={`${modeButtonBaseClass} ${currentMode === 'arsitek' ? activeModeClass : inactiveModeClass} rounded-tl-xl flex items-center`} 
+            onClick={() => setCurrentMode('arsitek')}
+          >
+            <Palette size={20} className="mr-2.5"/> Mode Arsitek
+          </button>
+          <button 
+            className={`${modeButtonBaseClass} ${currentMode === 'sutradara' ? activeModeClass : inactiveModeClass} rounded-tr-xl flex items-center`} 
+            onClick={() => setCurrentMode('sutradara')}
+          >
+            <Brain size={20} className="mr-2.5"/> Mode Sutradara
+          </button>
+        </div>
+      </div>
+      
+      <main className={`bg-slate-900 shadow-2xl w-full max-w-5xl 
+                       ${currentMode === 'arsitek' ? 'rounded-b-xl rounded-tr-xl' : 'rounded-b-xl rounded-tl-xl'} 
+                       border-x-2 border-b-2 border-indigo-700 overflow-hidden`}>
+        {currentMode === 'arsitek' ? <ModeArsitek /> : <ModeSutradara />}
+      </main>
+
+      <footer className="w-full max-w-5xl text-center py-8 mt-8">
+        <p className="text-sm text-indigo-400">&copy; {new Date().getFullYear()} MRC Prompt Generator. Imajinasi Tanpa Batas.</p>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
