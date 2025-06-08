@@ -10,7 +10,7 @@ const timeOptions = [
   { value: 'Night', label: 'Night (Malam Hari)' },
   { value: 'Dawn', label: 'Dawn (Fajar)' },
   { value: 'Dusk', label: 'Dusk (Senja)' },
-  { value: 'Morning', label: 'Morning (Pagi Hari)' },
+  { value: 'Morning', label: 'Morning (Pagi Hari)' 
   { value: 'Afternoon', label: 'Afternoon (Siang Menjelang Sore)' },
   { value: 'Evening', label: 'Evening (Sore Hari)' },
   { value: 'Midnight', label: 'Midnight (Tengah Malam)' },
@@ -1421,11 +1421,11 @@ English Translation:`;
     const subcategoryLabel = currentTool?.subcategories.find(sc => sc.value === selectedSubcategory)?.label || selectedSubcategory;
     const modeLabel = currentTool?.modes.find(m => m.value === selectedMode)?.label || selectedMode;
 
-    let llmPrompt = `Anda adalah AI Generator Ide Video Profesional MRC. Tugas: Hasilkan SATU konsep video awal yang detail berdasarkan input pengguna. Alat yang Dipilih: "${currentTool?.name || 'Tidak Diketahui'}" ${currentTool?.subcategories.length > 0 ? `Subkategori: "${subcategoryLabel}"` : ''} ${currentTool?.modes.length > 0 ? `Mode: "${modeLabel}"` : ''} Topik/Ide Utama Pengguna: "${topic}" Format Output yang Diharapkan (dalam Bahasa Indonesia) adalah objek JSON tunggal dengan properti: "judul": STRING, "deskripsi": STRING (2-4 kalimat), "lokasi": STRING, "objek": ARRAY of STRINGS, "dialog": ARRAY of OBJECTS ({ "character": "STRING", "line": "STRING" }), "tujuan": STRING, "topic_fakta": STRING (Khusus Fakta Unik), "product_name": STRING (Khusus Iklan). Contoh untuk ${currentTool?.name || 'alat ini'}: `;
+    let llmPrompt = `Anda adalah AI Generator Ide Video Profesional Zevidy. Tugas: Hasilkan SATU konsep video awal yang detail berdasarkan input pengguna. Alat yang Dipilih: "${currentTool?.name || 'Tidak Diketahui'}" ${currentTool?.subcategories.length > 0 ? `Subkategori: "${subcategoryLabel}"` : ''} ${currentTool?.modes.length > 0 ? `Mode: "${modeLabel}"` : ''} Topik/Ide Utama Pengguna: "${topic}" Format Output yang Diharapkan (dalam Bahasa Indonesia) adalah objek JSON tunggal dengan properti: "judul": STRING, "deskripsi": STRING (2-4 kalimat), "lokasi": STRING, "objek": ARRAY of STRINGS, "dialog": ARRAY of OBJECTS ({ "character": "STRING", "line": "STRING" }), "tujuan": STRING, "topic_fakta": STRING (Khusus Fakta Unik), "product_name": STRING (Khusus Iklan). Contoh untuk ${currentTool?.name || 'alat ini'}: `;
     let responseSchema = { type: "OBJECT", properties: { "judul": { "type": "STRING" }, "deskripsi": { "type": "STRING" }, "lokasi": { "type": "STRING" }, "objek": { "type": "ARRAY", "items": { "type": "STRING" } }, "dialog": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "character": { "type": "STRING" }, "line": { "type": "STRING" } }, "required": ["character", "line"] } }, "tujuan": { "type": "STRING" }, "topic_fakta": { "type": "STRING" }, "product_name": { "type": "STRING" } }, "required": ["judul", "deskripsi", "lokasi", "objek", "dialog", "tujuan"] };
 
     if (selectedToolId === 'blastMode') {
-        llmPrompt = `Anda adalah AI Generator Ide Video Profesional MRC. Tugas: Untuk topik "${topic}", hasilkan 10 konsep video pendek yang berbeda (masing-masing sekitar 8 detik). Setiap konsep harus mencakup: Judul, Deskripsi singkat adegan, Lokasi, Objek kunci, Dialog yang sangat singkat, dan Tujuan video. Karakter seperti MRC, JILBABGADING, MIA dapat digunakan. Pastikan dialog sangat singkat. Format Output: JSON array, setiap elemen adalah objek dengan properti: "judul", "deskripsi", "lokasi", "objek" (array string), "dialog" (array objek {character, line}), dan "tujuan".`;
+        llmPrompt = `Anda adalah AI Generator Ide Video Profesional Zevidy. Tugas: Untuk topik "${topic}", hasilkan 10 konsep video pendek yang berbeda (masing-masing sekitar 8 detik). Setiap konsep harus mencakup: Judul, Deskripsi singkat adegan, Lokasi, Objek kunci, Dialog yang sangat singkat, dan Tujuan video. Karakter seperti Zevidy, JILBABGADING, MIA dapat digunakan. Pastikan dialog sangat singkat. Format Output: JSON array, setiap elemen adalah objek dengan properti: "judul", "deskripsi", "lokasi", "objek" (array string), "dialog" (array objek {character, line}), dan "tujuan".`;
         responseSchema = { type: "ARRAY", items: { type: "OBJECT", properties: { "judul": { "type": "STRING" }, "deskripsi": { "type": "STRING" }, "lokasi": { "type": "STRING" }, "objek": { "type": "ARRAY", "items": { "type": "STRING" } }, "dialog": { "type": "ARRAY", "items": { "type": "OBJECT", "properties": { "character": { "type": "STRING" }, "line": { "type": "STRING" } }, "required": ["character", "line"] } }, "tujuan": { "type": "STRING" } }, "required": ["judul", "deskripsi", "lokasi", "objek", "dialog", "tujuan"] } };
     } 
     
@@ -1941,9 +1941,9 @@ const App = () => {
       
       <header className="w-full max-w-5xl text-center my-8 sm:my-12">
         {/* Placeholder for a more cinematic logo if available */}
-        {/* <img src="/path-to-your-logo.svg" alt="MRC Prompt Generator Logo" className="h-12 mx-auto mb-4"/> */}
+        {/* <img src="/path-to-your-logo.svg" alt="Zevidy Prompt Generator Logo" className="h-12 mx-auto mb-4"/> */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-lora font-extrabold text-yellow-300 tracking-tight">
-          MRC Prompt Generator
+          Zevidy Prompt Generator
         </h1>
         <p className="text-indigo-200 text-lg sm:text-xl mt-3">Gerbang Imajinasi Sinematik Anda</p>
       </header>
@@ -1972,7 +1972,7 @@ const App = () => {
       </main>
 
       <footer className="w-full max-w-5xl text-center py-8 mt-8">
-        <p className="text-sm text-indigo-400">&copy; {new Date().getFullYear()} MRC Prompt Generator. Imajinasi Tanpa Batas.</p>
+        <p className="text-sm text-indigo-400">&copy; {new Date().getFullYear()} Zevidy Prompt Generator. Imajinasi Tanpa Batas.</p>
       </footer>
     </div>
   );
